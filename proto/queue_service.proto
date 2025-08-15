@@ -7,12 +7,12 @@ service QueueService {
 }
 
 message Entity {
-    required string id = 1;
-    required string name = 2;
+    string id = 1;
+    string name = 2;
 }
 
 message GetQueueRequest {
-  required string id = 1;
+  string id = 1;
 }
 
 message GetQueueResponse {
@@ -20,8 +20,8 @@ message GetQueueResponse {
 }
 
 message SetQueueRequest {
-  required string id = 1;
-  repeated Entity entities = 2;
+  string id = 1;
+Entity entities = 2;
 }
 
 message SetQueueResponse {}
