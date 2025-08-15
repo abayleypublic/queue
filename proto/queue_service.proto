@@ -1,4 +1,7 @@
-service Queue {
+syntax = "proto3";
+package queue;
+
+service QueueService {
   rpc GetQueue (GetQueueRequest) returns (GetQueueResponse) {}
   rpc SetQueue (SetQueueRequest) returns (SetQueueResponse) {}
 }
