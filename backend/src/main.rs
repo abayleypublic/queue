@@ -1,13 +1,13 @@
 mod service;
 
-use tonic::transport::Server;
+use log::{error, info};
 use serde::Deserialize;
-use tracing::{event, Level};
+use tonic::transport::Server;
 
-pub mod proto { 
-    pub(crate) const FILE_DESCRIPTOR_SET: &[u8] = 
-        tonic::include_file_descriptor_set!("queue_descriptor"); 
-} 
+pub mod proto {
+    pub(crate) const FILE_DESCRIPTOR_SET: &[u8] =
+        tonic::include_file_descriptor_set!("queue_descriptor");
+}
 
 #[derive(Deserialize, Debug)]
 struct Config {
@@ -29,11 +29,11 @@ fn default_redis_url() -> String {
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let cfg = match envy::prefixed("BACKEND_").from_env::<Config>() {
-       Ok(config) => config,
-       Err(error) => {
-            event!(Level::ERROR, %error, "configuration error");
+        Ok(config) => config,
+        Err(error) => {
+            error!("configuration error: {}", error);
             std::process::exit(1);
-       }
+        }
     };
 
     let client = redis::Client::open(cfg.redis_url).unwrap();
@@ -41,16 +41,18 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let queue_service = service::QueueService::new(redis_connection);
 
-    let reflection_service = tonic_reflection::server::Builder::configure() 
-            .register_encoded_file_descriptor_set(proto::FILE_DESCRIPTOR_SET) 
-            .build_v1alpha() 
-            .unwrap(); 
+    let reflection_service = tonic_reflection::server::Builder::configure()
+        .register_encoded_file_descriptor_set(proto::FILE_DESCRIPTOR_SET)
+        .build_v1alpha()
+        .unwrap();
 
     let addr = cfg.address.parse()?;
-    event!(Level::INFO, "starting server on {}", cfg.address);
+    info!("starting server on {}", cfg.address);
 
     Server::builder()
-        .add_service(service::queue::queue_server::QueueServer::new(queue_service))
+        .add_service(service::queue::queue_server::QueueServer::new(
+            queue_service,
+        ))
         .add_service(reflection_service)
         .serve(addr)
         .await?;

@@ -21,7 +21,7 @@ message GetQueueResponse {
 
 message SetQueueRequest {
   string id = 1;
-Entity entities = 2;
+  repeated Entity entities = 2;
 }
 
 message SetQueueResponse {}

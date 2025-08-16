@@ -1,13 +1,13 @@
 pub mod queue {
-    tonic::include_proto!("queue"); 
+    tonic::include_proto!("queue");
 }
 
+use log::debug;
+use queue::queue_server::Queue;
+use queue::{Entity, GetQueueRequest, GetQueueResponse, SetQueueRequest, SetQueueResponse};
 use redis::AsyncCommands;
-use tonic::{Request, Response, Status};
-use queue::queue_server::{Queue};
-use queue::{GetQueueRequest, GetQueueResponse, SetQueueRequest, SetQueueResponse, Entity};
 use redis::aio::MultiplexedConnection;
-use log::{debug};
+use tonic::{Request, Response, Status};
 
 #[derive(Debug, Clone)]
 pub struct QueueService {
@@ -24,7 +24,6 @@ impl QueueService {
     }
 }
 
-
 #[tonic::async_trait]
 impl Queue for QueueService {
     async fn get_queue(
@@ -34,18 +33,19 @@ impl Queue for QueueService {
         debug!("received get_queue request: {:?}", request);
 
         let key = queue_key(request.into_inner().id);
-        let res: Vec<String> = self.redis.clone().lrange(key, 0, -1).await.map_err(|e| {
-            Status::internal(format!("Redis error: {}", e))
-        })?;
+        let res: Vec<String> = self
+            .redis
+            .clone()
+            .lrange(key, 0, -1)
+            .await
+            .map_err(|e| Status::internal(format!("Redis error: {}", e)))?;
 
         let entities: Vec<Entity> = res
             .into_iter()
             .filter_map(|item| serde_json::from_str(&item).ok())
             .collect();
 
-        let response = GetQueueResponse {
-            entities: entities,
-        };
+        let response = GetQueueResponse { entities: entities };
 
         Ok(Response::new(response))
     }
@@ -58,18 +58,26 @@ impl Queue for QueueService {
 
         let inner = request.into_inner();
         let key = queue_key(inner.id);
-        let _: () = self.redis.clone().del(&key).await.map_err(|e| {
-            Status::internal(format!("Redis error on delete: {}", e))
-        })?;
+        let _: () = self
+            .redis
+            .clone()
+            .del(&key)
+            .await
+            .map_err(|e| Status::internal(format!("Redis error on delete: {}", e)))?;
 
         // Push the new entities to the Redis list
-        let entities: Vec<String> = inner.entities.into_iter()
+        let entities: Vec<String> = inner
+            .entities
+            .into_iter()
             .filter_map(|entity| serde_json::to_string(&entity).ok())
             .collect();
 
-        let _: () = self.redis.clone().rpush(&key, entities).await.map_err(|e| {
-            Status::internal(format!("Redis error on push: {}", e))
-        })?;
+        let _: () = self
+            .redis
+            .clone()
+            .rpush(&key, entities)
+            .await
+            .map_err(|e| Status::internal(format!("Redis error on push: {}", e)))?;
 
         Ok(Response::new(SetQueueResponse {}))
     }
