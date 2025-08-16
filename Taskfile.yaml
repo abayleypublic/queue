@@ -1,0 +1,8 @@
+version: '3'
+
+tasks:
+  gen-python-grpc:
+    dir: "mcp"
+    cmds:
+      - mkdir -p src/gen
+      - .venv/bin/python -m grpc_tools.protoc -Isrc/gen=proto --python_out=. --pyi_out=. --grpc_python_out=. proto/queue_service.proto

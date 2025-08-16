@@ -5,6 +5,8 @@
  - Implement service
  - Implement UI
  - Auth for requests from the service via MCP to backend 
+ - Conflict logic on backend i.e. don't allow something in the queue twice
+ - Multi tenancy on backend (ensure updates don't interrupt one another)
 
 ## Services / Direcories
 
