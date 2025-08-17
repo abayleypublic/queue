@@ -1,7 +1,9 @@
 from pydantic import BaseModel
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class BackendConfig(BaseSettings):
+    model_config = SettingsConfigDict(env_prefix="mcp_backend_")
+
     host: str = "localhost"
     port: int = 8001
 
@@ -9,16 +11,14 @@ class BackendConfig(BaseSettings):
     def url(self) -> str:
         return f"{self.host}:{self.port}"
 
-    class Config:
-        env_prefix = "mcp_backend_"
-
+    
 class ServerConfig(BaseSettings):
+    model_config = SettingsConfigDict(env_prefix="mcp_server_")
+
     transport: str = "http"
     host: str = "localhost"
     port: int = 8002
 
-    class Config:
-        env_prefix = "mcp_"
 
 class Config(BaseModel):
     server: ServerConfig = ServerConfig()
