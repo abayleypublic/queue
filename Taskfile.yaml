@@ -6,3 +6,11 @@ tasks:
     cmds:
       - mkdir -p src/gen
       - .venv/bin/python -m grpc_tools.protoc -Isrc/gen=proto --python_out=. --pyi_out=. --grpc_python_out=. proto/queue_service.proto
+
+  gen-go-gateway:
+    dir: "gateway"
+    cmds:
+      - |
+        protoc -I . --grpc-gateway_out ./gen/go \
+        --grpc-gateway_opt paths=source_relative \
+        proto/queue_service.proto

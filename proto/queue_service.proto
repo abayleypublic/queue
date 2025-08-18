@@ -1,9 +1,22 @@
 syntax = "proto3";
 package queue;
+option go_package = "github.com/abayleypublic/queue/gateway";
+
+import "google/api/annotations.proto";
 
 service Queue {
-  rpc GetQueue (GetQueueRequest) returns (GetQueueResponse) {}
-  rpc SetQueue (SetQueueRequest) returns (SetQueueResponse) {}
+  rpc GetQueue (GetQueueRequest) returns (GetQueueResponse) {
+    option (google.api.http) = {
+      get: "/queue/{id}"
+    };
+  }
+
+  rpc SetQueue (SetQueueRequest) returns (SetQueueResponse) {
+    option (google.api.http) = {
+      put: "/queue/{id}"
+      body: "*"
+    };
+  }
 }
 
 message Entity {
