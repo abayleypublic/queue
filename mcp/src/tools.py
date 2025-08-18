@@ -19,8 +19,6 @@ def add_to_queue(
     add_to_queue adds an entity to the specified queue
     """
 
-    print("got request")
-
     with insecure_channel(cfg.backend.url) as channel:
         stub = QueueStub(channel)
 

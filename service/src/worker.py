@@ -2,10 +2,10 @@ from temporalio.worker import Worker
 from loguru import logger
 
 from .config import cfg
-from .workflows import Conversation, agent
+from .workflows import Conversation
 
 async def run_worker():
-    logger.info("Starting Temporal worker...")
+    logger.info("starting Temporal worker...")
     client = await cfg.temporal_client
     await cfg.mcp.init_tools()
 

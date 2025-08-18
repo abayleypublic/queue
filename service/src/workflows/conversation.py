@@ -1,7 +1,6 @@
 from asyncio import Lock
 from typing import List
 from datetime import timedelta
-from inspect import signature
 
 from temporalio import workflow
 
@@ -13,7 +12,6 @@ with workflow.unsafe.imports_passed_through():
         RunResult, 
         TResponseInputItem,
         RunConfig,
-        FunctionTool
     )
     from temporalio.contrib.openai_agents.workflow import activity_as_tool
 
@@ -23,18 +21,17 @@ with workflow.unsafe.imports_passed_through():
 agent = Agent(
     name="Conversation Agent",
     model=cfg.openai.model,
-    # tools=[activity_as_tool(tool) for tool in cfg.mcp.tools],
     instructions="You are a helpful assistant for a conversation. Respond to user messages.",
+
+    # The Temporal integration with OpenAI Agents does not currently support dynamic calls to MCP servers,
+    # thus this workaround is necessary. It caches the tools at startup.
+    # mcp_servers=[cfg.mcp.streamable_http],
     tools=[activity_as_tool(tool, start_to_close_timeout=timedelta(seconds=10)) for tool in cfg.mcp.activities]
 
     # gpt-oss:20b doesn't work with structured outputs yet: https://github.com/ollama/ollama/issues/11691
     # I would like to use it though so I'm going to go for no structured output for now
     # output_type=ConversationResultSchema
 )
-
-if len(agent.tools) > 0:
-    # print("params", agent.tools[0].params_json_schema)
-    [print(signature(tool)) for tool in cfg.mcp.activities]
 
 class ConversationArgs(BaseModel):
     user_id: str

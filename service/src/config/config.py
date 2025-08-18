@@ -1,28 +1,27 @@
 from datetime import timedelta
-from typing import Coroutine, Any, List, Dict, Type, Optional
+from typing import Coroutine, Any, List, Type, Optional
 from inspect import signature, Parameter
 
 from openai import AsyncOpenAI
-from agents import OpenAIProvider, Tool, function_tool, FunctionTool
+from agents import OpenAIProvider
 from agents.mcp import  MCPServerStreamableHttp, MCPServerStreamableHttpParams
-from pydantic import BaseModel, create_model
+from pydantic import BaseModel
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from temporalio.client import Client
 from temporalio.common import RetryPolicy
-from temporalio import activity
 from temporalio.activity import _Definition
 from temporalio.contrib.pydantic import pydantic_data_converter
 from temporalio.contrib.openai_agents import OpenAIAgentsPlugin, ModelActivityParameters
-from temporalio.contrib.openai_agents.workflow import activity_as_tool
 from mcp import Tool as MCPTool
 
-type_mapping: dict[str, type] = {
+# as per https://json-schema.org/understanding-json-schema/reference/type
+json_schema_types_to_python: dict[str, type] = {
     "string": str,
-    "integer": int,
     "number": float,
-    "boolean": bool,
-    "array": list,
     "object": dict,
+    "array": list,
+    "boolean": bool,
+    "null": type(None)
 }
 
 class APIConfig(BaseSettings):
@@ -37,16 +36,7 @@ class Property(BaseModel):
     type: Type
 
     def docstring(self) -> str:
-        return f"{self.name} ({str(self.type)}): {self.description}"
-
-def test(foo:str, bar: str) -> str:
-    pass
-
-sig_test = signature(test)
-
-[print(f"{k}: {v.kind}") for k, v in sig_test.parameters.items()]
-
-print("signaturetest", sig_test.parameters)
+        return f"{self.name} ({self.type.__name__}): {self.description}"
 
 class MCPConfig(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="service_mcp_")
@@ -64,10 +54,22 @@ class MCPConfig(BaseSettings):
         )
 
     def _mcp_tool_to_activity(self, tool: MCPTool):
+        """
+        _mcp_tool_to_activity converts an MCP tool to a Temporal activity. This is made necessary
+        by the Temporal OpenAI agents integration currently being unable to consume dynamic
+        MCP server calls. This function focusses on translating the MCP tool call into a standard
+        function, complete with docstring and signature. It also wraps the function with the
+        activity definition which enables simple translation to a function tool via the method
+        supplied by the Temporal library.
+
+        A potential enhnacement would be to use the `create_model` function from Pydantic but this
+        adds some complexity to an already overly complex system.
+        """
+
         input_properties: List[Property] = []
 
         for name, prop in tool.inputSchema.get("properties", {}).items():
-            t = type_mapping.get(prop.get("type"), None)
+            t = json_schema_types_to_python.get(prop.get("type"), None)
             required = name in tool.inputSchema.get("required", [])
 
             input_properties.append(Property(
@@ -77,7 +79,7 @@ class MCPConfig(BaseSettings):
                 type=t if required else Optional[t]
             ))
 
-        t = type_mapping.get(prop.get("type"), None)
+        t = json_schema_types_to_python.get(prop.get("type"), None)
         required = name in tool.inputSchema.get("required", [])
         result: Property = Property(
             name="result",
@@ -87,17 +89,13 @@ class MCPConfig(BaseSettings):
         )
 
         async def run(*args, **kwargs):
-            print("tool", tool.name)
-            print("args", args)
-            print("kwargs", kwargs)
-
+            """
+            run simply calls the MCP tool with the provided arguments.
+            """
             input = kwargs if len(args) == 0 else {prop.name: arg for prop, arg in zip(input_properties, args)}
 
             async with self.streamable_http as conn:
-                print("calling tool", tool.name)
-                res = await conn.call_tool(tool.name, input)
-                print("res", res)
-                return res
+                return await conn.call_tool(tool.name, input)
 
         setattr(run, "__name__", tool.name)
 
@@ -109,7 +107,6 @@ class MCPConfig(BaseSettings):
             return_annotation=result.type
         )
         setattr(run, "__signature__", sig)
-        print("signaturexyz", sig.parameters)
 
         args_doc = "\n".join([prop.docstring() for prop in input_properties])
         setattr(run, "__doc__", f"""
@@ -120,36 +117,25 @@ class MCPConfig(BaseSettings):
 
             Returns:
             {result.docstring()}
-        """)
-
-        # arg_types = [
-        #     prop.type for prop in input_properties
-        # ]
-
-        # print("arg_types", arg_types)
-
-        # setattr(
-        #     run,
-        #     "__temporal_activity_definition",
-        #     _Definition(
-        #         name=tool.name,
-        #         fn=run,
-        #         is_async=True,
-        #         no_thread_cancel_exception=False,
-        #         # arg_types=arg_types,
-        #         # ret_type=result.type
-        #     ),
-        # )            
+        """)           
 
         _Definition._apply_to_callable(run, activity_name=tool.name)
         return run
     
     async def init_tools(self):
+        """
+        init_tools caches the tools available on the MCP server. It must be called
+        prior to using the `activities` property.
+        """
         async with self.streamable_http as conn:
             self._tools = await conn.list_tools()
 
     @property
     def activities(self):
+        """
+        activities returns a list of available tools as Temporal activities. `init_tools`
+        must be called before accessing this property.
+        """
         return [self._mcp_tool_to_activity(tool) for tool in self._tools]
 
 class OpenAIConfig(BaseSettings):

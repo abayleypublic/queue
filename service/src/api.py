@@ -9,7 +9,7 @@ app = FastAPI()
 app.include_router(messages.router)
 
 async def run_api():
-    logger.info("Starting API server...")
+    logger.info("starting API server...")
     config = Config(app=app, port=cfg.api.port, log_level="info")
     server = Server(config)
     await server.serve()
