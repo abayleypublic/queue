@@ -83,7 +83,7 @@ class MCPConfig(BaseSettings):
         required = name in tool.inputSchema.get("required", [])
         result: Property = Property(
             name="result",
-            description="The result of the tool execution",
+            description=prop.get("description", "The result of the tool execution"),
             title="Result",
             type=t if required else Optional[t]
         )
