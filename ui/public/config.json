@@ -1,0 +1,5 @@
+{
+    "api_url": "http://localhost:5173",
+    "queue": "default",
+    "user": "austin"
+}

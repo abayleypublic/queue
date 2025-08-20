@@ -5,7 +5,11 @@ tasks:
     dir: "mcp"
     cmds:
       - mkdir -p src/gen
-      - .venv/bin/python -m grpc_tools.protoc -Isrc/gen=proto --python_out=. --pyi_out=. --grpc_python_out=. proto/queue_service.proto
+      - |
+        .venv/bin/python -m grpc_tools.protoc \
+        -I src/gen=proto proto/google/api/*.proto \
+        --python_out=. --pyi_out=. --grpc_python_out=. \
+        proto/queue_service.proto
 
   gen-go-gateway:
     dir: "gateway"
