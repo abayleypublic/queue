@@ -20,10 +20,23 @@ class MessageResponse(BaseModel):
     text: str
     actor: str
 
-@router.get("", response_model=List[MessageResponse])
-async def get_messages() -> List[MessageResponse]:
+@router.get("/{id}", response_model=List[MessageResponse])
+async def get_messages(id: str) -> List[MessageResponse]:
     client = await cfg.temporal_client
-    handle = client.get_workflow_handle(Conversation.id("abayley"))
+    running = False
+    try:
+        handle = client.get_workflow_handle(Conversation.id(id))
+        desc = await handle.describe()
+        running = desc.status == WorkflowExecutionStatus.RUNNING
+    except RPCError as e:
+        logger.error(f"error describing workflow: {e}")
+    except Exception as e:
+        logger.error(f"unexpected error describing workflow: {e}")
+        raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="an unexpected error occurred") from e
+
+    if not running:
+        return []
+
     history: List[TResponseInputItem] = await handle.query("get_history")
 
     output: List[MessageResponse] = []
@@ -55,14 +68,14 @@ async def get_messages() -> List[MessageResponse]:
 
     return output
 
-@router.post("", response_model=ConversationResultSchema)
-async def create_message(message: Message) -> ConversationResultSchema:
+@router.post("/{id}", response_model=ConversationResultSchema)
+async def create_message(id: str, message: Message) -> ConversationResultSchema:
     client = await cfg.temporal_client
 
     handle: WorkflowHandle[Conversation, str] | None = None
     running = False
     try:
-        handle = client.get_workflow_handle(Conversation.id("abayley"))
+        handle = client.get_workflow_handle(Conversation.id(id))
         desc = await handle.describe()
         running = desc.status == WorkflowExecutionStatus.RUNNING
     except RPCError as e:
@@ -74,8 +87,8 @@ async def create_message(message: Message) -> ConversationResultSchema:
     if not running:
         handle = await client.start_workflow(
             Conversation.run,
-            ConversationArgs(user_id="abayley"),
-            id=Conversation.id("abayley"),
+            ConversationArgs(user_id=id),
+            id=Conversation.id(id),
             task_queue=cfg.temporal.task_queue,
             id_reuse_policy=WorkflowIDReusePolicy.TERMINATE_IF_RUNNING,
         )

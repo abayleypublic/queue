@@ -1,12 +1,13 @@
 # queue
 
 ## TODO
- - Implement MCP Service
- - Implement service
+ - Fix protos for MCP and Gateway 
+ - Get rid of Buf (possible on resolution of above)
  - Implement UI
  - Auth for requests from the service via MCP to backend 
  - Conflict logic on backend i.e. don't allow something in the queue twice
  - Multi tenancy on backend (ensure updates don't interrupt one another)
+
 
 ## Services / Direcories
 
