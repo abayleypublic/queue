@@ -1,0 +1,5 @@
+version: v2
+name: buf.build/abayleypublic/queue
+deps:
+  - buf.build/googleapis/googleapis
+  - buf.build/grpc-ecosystem/grpc-gateway
