@@ -7,8 +7,7 @@ interface GetChatArgs {
 
 export const GetChat = async ({ id }: GetChatArgs): Promise<Array<Message>> => {
     const response = await fetch(`${Config.apiURL}/service/messages/${id}`)
-    const data = await response.json()
-    return data
+    return await response.json()
 }
 
 interface SendMessageArgs {
@@ -16,8 +15,8 @@ interface SendMessageArgs {
     message: string
 }
 
-export const SendMessage = async ({ id, message }: SendMessageArgs): Promise<Array<Message>> => {
-    const response = await fetch(`${Config.apiURL}/service/messages/${id}`, {
+export const SendMessage = async ({ id, message }: SendMessageArgs): Promise<void> => {
+    await fetch(`${Config.apiURL}/service/messages/${id}`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -26,6 +25,4 @@ export const SendMessage = async ({ id, message }: SendMessageArgs): Promise<Arr
             text: message
         })
     })
-    const data = await response.json()
-    return data
 }
