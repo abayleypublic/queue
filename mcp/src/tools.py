@@ -10,6 +10,28 @@ from .gen.queue_service_pb2_grpc import QueueStub
 
 mcp = FastMCP("My MCP Server")
 
+
+# This translates to a string but only because I would prefer to spend the effort on
+# other things for now
+@mcp.tool
+def get_queue(
+    queue_id: Annotated[str, "The ID of the queue"]
+) -> str:
+    """
+    get_queue retrieves the specified queue. The response is a comma-separated list of entity IDs.
+    """
+
+    with insecure_channel(cfg.backend.url) as channel:
+        stub = QueueStub(channel)
+
+        try:
+            response: GetQueueResponse = stub.GetQueue(GetQueueRequest(id=queue_id))
+        except RpcError as e:
+            logger.error("failed to get queue: " + str(e))
+            raise e
+
+    return ", ".join([str(entity.id) for entity in response.entities]) or "No entities in queue"
+
 @mcp.tool
 def add_to_queue(
     queue_id: Annotated[str, "The ID of the queue"],
