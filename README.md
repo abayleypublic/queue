@@ -1,10 +1,20 @@
 # queue
 
+## TODO
+ - Implement MCP Service
+ - Implement service
+ - Implement UI
+ - Auth for requests from the service via MCP to backend 
+
 ## Services / Direcories
 
 ### Backend
 
 A Rust-based, gRPC service dedicated to managing the queue. Does it need to be in Rust? Absolutely not but it feels like a simple use-case and therefore a good chance to give it a go!
+
+### Dev
+
+This is a subdmodule pointing to resources I use for local development without having to run everything in containers.
 
 ### MCP
 

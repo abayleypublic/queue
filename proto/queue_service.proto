@@ -1,0 +1,27 @@
+syntax = "proto3";
+package queue;
+
+service Queue {
+  rpc GetQueue (GetQueueRequest) returns (GetQueueResponse) {}
+  rpc SetQueue (SetQueueRequest) returns (SetQueueResponse) {}
+}
+
+message Entity {
+    string id = 1;
+    string name = 2;
+}
+
+message GetQueueRequest {
+  string id = 1;
+}
+
+message GetQueueResponse {
+  repeated Entity entities = 1;
+}
+
+message SetQueueRequest {
+  string id = 1;
+  repeated Entity entities = 2;
+}
+
+message SetQueueResponse {}
