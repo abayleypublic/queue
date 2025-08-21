@@ -143,8 +143,8 @@ class OpenAIConfig(BaseSettings):
 
     api_key: str = "1234"
     api_base: str = "http://localhost:11434/v1"
-    model: str = "gpt-oss:20b"
-    # model: str = "llama3.2:3b"
+    # model: str = "gpt-oss:20b"
+    model: str = "llama3.2:3b"
 
     _client: AsyncOpenAI | None = None
 

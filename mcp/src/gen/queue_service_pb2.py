@@ -22,25 +22,31 @@ _runtime_version.ValidateProtobufRuntimeVersion(
 _sym_db = _symbol_database.Default()
 
 
+from google.api import annotations_pb2 as google_dot_api_dot_annotations__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1bsrc/gen/queue_service.proto\x12\x05queue\"\"\n\x06\x45ntity\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\"\x1d\n\x0fGetQueueRequest\x12\n\n\x02id\x18\x01 \x01(\t\"3\n\x10GetQueueResponse\x12\x1f\n\x08\x65ntities\x18\x01 \x03(\x0b\x32\r.queue.Entity\">\n\x0fSetQueueRequest\x12\n\n\x02id\x18\x01 \x01(\t\x12\x1f\n\x08\x65ntities\x18\x02 \x03(\x0b\x32\r.queue.Entity\"\x12\n\x10SetQueueResponse2\x85\x01\n\x05Queue\x12=\n\x08GetQueue\x12\x16.queue.GetQueueRequest\x1a\x17.queue.GetQueueResponse\"\x00\x12=\n\x08SetQueue\x12\x16.queue.SetQueueRequest\x1a\x17.queue.SetQueueResponse\"\x00\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1bsrc/gen/queue_service.proto\x12\x05queue\x1a\x1cgoogle/api/annotations.proto\"\"\n\x06\x45ntity\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\"\x1d\n\x0fGetQueueRequest\x12\n\n\x02id\x18\x01 \x01(\t\"3\n\x10GetQueueResponse\x12\x1f\n\x08\x65ntities\x18\x01 \x03(\x0b\x32\r.queue.Entity\">\n\x0fSetQueueRequest\x12\n\n\x02id\x18\x01 \x01(\t\x12\x1f\n\x08\x65ntities\x18\x02 \x03(\x0b\x32\r.queue.Entity\"\x12\n\x10SetQueueResponse2\xae\x01\n\x05Queue\x12P\n\x08GetQueue\x12\x16.queue.GetQueueRequest\x1a\x17.queue.GetQueueResponse\"\x13\x82\xd3\xe4\x93\x02\r\x12\x0b/queue/{id}\x12S\n\x08SetQueue\x12\x16.queue.SetQueueRequest\x1a\x17.queue.SetQueueResponse\"\x16\x82\xd3\xe4\x93\x02\x10\x1a\x0b/queue/{id}:\x01*B(Z&github.com/abayleypublic/queue/gatewayb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'src.gen.queue_service_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
-  DESCRIPTOR._loaded_options = None
-  _globals['_ENTITY']._serialized_start=38
-  _globals['_ENTITY']._serialized_end=72
-  _globals['_GETQUEUEREQUEST']._serialized_start=74
-  _globals['_GETQUEUEREQUEST']._serialized_end=103
-  _globals['_GETQUEUERESPONSE']._serialized_start=105
-  _globals['_GETQUEUERESPONSE']._serialized_end=156
-  _globals['_SETQUEUEREQUEST']._serialized_start=158
-  _globals['_SETQUEUEREQUEST']._serialized_end=220
-  _globals['_SETQUEUERESPONSE']._serialized_start=222
-  _globals['_SETQUEUERESPONSE']._serialized_end=240
-  _globals['_QUEUE']._serialized_start=243
-  _globals['_QUEUE']._serialized_end=376
+  _globals['DESCRIPTOR']._loaded_options = None
+  _globals['DESCRIPTOR']._serialized_options = b'Z&github.com/abayleypublic/queue/gateway'
+  _globals['_QUEUE'].methods_by_name['GetQueue']._loaded_options = None
+  _globals['_QUEUE'].methods_by_name['GetQueue']._serialized_options = b'\202\323\344\223\002\r\022\013/queue/{id}'
+  _globals['_QUEUE'].methods_by_name['SetQueue']._loaded_options = None
+  _globals['_QUEUE'].methods_by_name['SetQueue']._serialized_options = b'\202\323\344\223\002\020\032\013/queue/{id}:\001*'
+  _globals['_ENTITY']._serialized_start=68
+  _globals['_ENTITY']._serialized_end=102
+  _globals['_GETQUEUEREQUEST']._serialized_start=104
+  _globals['_GETQUEUEREQUEST']._serialized_end=133
+  _globals['_GETQUEUERESPONSE']._serialized_start=135
+  _globals['_GETQUEUERESPONSE']._serialized_end=186
+  _globals['_SETQUEUEREQUEST']._serialized_start=188
+  _globals['_SETQUEUEREQUEST']._serialized_end=250
+  _globals['_SETQUEUERESPONSE']._serialized_start=252
+  _globals['_SETQUEUERESPONSE']._serialized_end=270
+  _globals['_QUEUE']._serialized_start=273
+  _globals['_QUEUE']._serialized_end=447
 # @@protoc_insertion_point(module_scope)

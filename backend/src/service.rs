@@ -61,7 +61,7 @@ impl Queue for QueueService {
         let _: () = self
             .redis
             .clone()
-            .del(&key)
+            .del::<_, ()>(&key)
             .await
             .map_err(|e| Status::internal(format!("Redis error on delete: {}", e)))?;
 
@@ -71,6 +71,17 @@ impl Queue for QueueService {
             .into_iter()
             .filter_map(|entity| serde_json::to_string(&entity).ok())
             .collect();
+
+        if entities.is_empty() {
+            let _: () = self
+                .redis
+                .clone()
+                .del(&key)
+                .await
+                .map_err(|e| Status::internal(format!("Redis error on push: {}", e)))?;
+
+            return Ok(Response::new(SetQueueResponse {}));
+        }
 
         let _: () = self
             .redis
