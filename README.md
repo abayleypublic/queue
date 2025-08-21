@@ -6,7 +6,7 @@
  - Conflict logic on backend i.e. don't allow something in the queue twice
  - Multi tenancy on backend (ensure updates don't interrupt one another)
 
-## Services / Direcories
+## Services / Directories
 
 ### Backend
 
