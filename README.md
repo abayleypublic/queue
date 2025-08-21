@@ -8,7 +8,7 @@
 
 ## Architecture
 
-![architecture](https://github.com/abayleypublic/queue/architecture.svg?sanitize=true)
+![architecture](architecture.svg)
 
 ## Services / Directories
 
