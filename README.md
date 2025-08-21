@@ -8,6 +8,9 @@
  - Conflict logic on backend i.e. don't allow something in the queue twice
  - Multi tenancy on backend (ensure updates don't interrupt one another)
 
+## Architecture
+
+![architecture](https://github.com/abayleypublic/queue/architecture.svg?sanitize=true)
 
 ## Services / Direcories
 
