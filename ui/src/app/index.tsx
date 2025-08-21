@@ -57,14 +57,14 @@ const App = () => {
               queueLoading && <div className="flex justify-center"> <Spinner variant="ring" /> </div>
             }
             {
-              queue && queue.entities.length === 0 && (
+              queue && queue.entities && queue.entities.length === 0 && (
                 <div className="flex justify-center">
                   <p className="text-sm text-gray-500">Nothing in the queue</p>
                 </div>
               )
             }
             {
-              queue && queue.entities.map((entity, idx) => (
+              queue && queue.entities?.map((entity, idx) => (
                 <QueueCard key={idx} position={idx + 1} title={entity.name} description={`(${entity.id})`} />
               ))
             }

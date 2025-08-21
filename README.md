@@ -2,6 +2,7 @@
 
 ## TODO
  - Better MCP -> activity translation mechanism
+ - Fix definition of get queue MCP tool (should not just return a string)
  - Auth for requests from the service via MCP to backend 
  - Conflict logic on backend i.e. don't allow something in the queue twice
  - Multi tenancy on backend (ensure updates don't interrupt one another)
@@ -39,3 +40,5 @@ A Python service dedicated to running AI agents for interacting with the backend
 ### UI
 
 A TypeScript, React & Vite based implementation consuming Tailwind for styling.
+
+## Demo
