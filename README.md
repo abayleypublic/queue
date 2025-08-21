@@ -1,13 +1,10 @@
 # queue
 
 ## TODO
- - Fix protos for MCP and Gateway 
- - Get rid of Buf (possible on resolution of above)
- - Implement UI
+ - Better MCP -> activity translation mechanism
  - Auth for requests from the service via MCP to backend 
  - Conflict logic on backend i.e. don't allow something in the queue twice
  - Multi tenancy on backend (ensure updates don't interrupt one another)
-
 
 ## Services / Direcories
 
@@ -18,6 +15,10 @@ A Rust-based, gRPC service dedicated to managing the queue. Does it need to be i
 ### Dev
 
 This is a subdmodule pointing to resources I use for local development without having to run everything in containers.
+
+### Gateway
+
+The gateway fronts the backend service gRPC API with a UI friendly REST based implementation. 
 
 ### MCP
 

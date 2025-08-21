@@ -59,7 +59,7 @@ const App = () => {
             {
               queue && queue.entities.length === 0 && (
                 <div className="flex justify-center">
-                  <p className="text-sm text-gray-500">No messages in the queue</p>
+                  <p className="text-sm text-gray-500">Nothing in the queue</p>
                 </div>
               )
             }
