@@ -1,8 +1,11 @@
-mod service;
+mod api;
+mod user;
 
+use api::middleware::auth_interceptor;
+use api::queue::queue::queue_server::QueueServer;
 use log::{error, info};
 use serde::Deserialize;
-use tonic::transport::Server;
+use tonic::{service::interceptor::InterceptedService, transport::Server};
 
 pub mod proto {
     pub(crate) const FILE_DESCRIPTOR_SET: &[u8] =
@@ -39,7 +42,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let client = redis::Client::open(cfg.redis_url).unwrap();
     let redis_connection = client.get_multiplexed_async_connection().await.unwrap();
 
-    let queue_service = service::QueueService::new(redis_connection);
+    let queue_service = api::queue::QueueService::new(redis_connection);
 
     let reflection_service = tonic_reflection::server::Builder::configure()
         .register_encoded_file_descriptor_set(proto::FILE_DESCRIPTOR_SET)
@@ -49,10 +52,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let addr = cfg.address.parse()?;
     info!("starting server on {}", cfg.address);
 
+    let svc = QueueServer::new(queue_service);
+    let intercepted_svc = InterceptedService::new(svc, auth_interceptor);
+
     Server::builder()
-        .add_service(service::queue::queue_server::QueueServer::new(
-            queue_service,
-        ))
+        .add_service(intercepted_svc)
         .add_service(reflection_service)
         .serve(addr)
         .await?;

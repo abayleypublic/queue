@@ -19,6 +19,19 @@ type Config struct {
 	Port    int    `envconfig:"port" default:"8004"`
 }
 
+func CustomMatcher(key string) (string, bool) {
+	switch key {
+	case "X-Auth-Request-User":
+		return key, true
+	case "X-Auth-Request-Email":
+		return key, true
+	case "X-Auth-Request-Groups":
+		return key, true
+	default:
+		return runtime.DefaultHeaderMatcher(key)
+	}
+}
+
 func main() {
 	var cfg Config
 	if err := envconfig.Process("gateway_", &cfg); err != nil {
@@ -29,7 +42,9 @@ func main() {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	mux := runtime.NewServeMux()
+	mux := runtime.NewServeMux(
+		runtime.WithIncomingHeaderMatcher(CustomMatcher),
+	)
 	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
 	if err := gw.RegisterQueueHandlerFromEndpoint(ctx, mux, cfg.Backend, opts); err != nil {
 		log.Fatal().Err(err).Msg("failed to register gateway handler")

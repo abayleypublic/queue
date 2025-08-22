@@ -9,6 +9,8 @@ use redis::AsyncCommands;
 use redis::aio::MultiplexedConnection;
 use tonic::{Request, Response, Status};
 
+use crate::api::middleware::user_from_request;
+
 #[derive(Debug, Clone)]
 pub struct QueueService {
     redis: MultiplexedConnection,
@@ -31,6 +33,11 @@ impl Queue for QueueService {
         request: Request<GetQueueRequest>,
     ) -> Result<Response<GetQueueResponse>, Status> {
         debug!("received get_queue request: {:?}", request);
+
+        let user = user_from_request(&request);
+        if user.is_none() || user.unwrap().email.is_empty() {
+            return Err(Status::unauthenticated("user not authenticated"));
+        }
 
         let key = queue_key(request.into_inner().id);
         let res: Vec<String> = self
@@ -55,6 +62,11 @@ impl Queue for QueueService {
         request: Request<SetQueueRequest>,
     ) -> Result<Response<SetQueueResponse>, Status> {
         debug!("received set_queue request: {:?}", request);
+
+        let user = user_from_request(&request);
+        if user.is_none() || user.unwrap().email.is_empty() {
+            return Err(Status::unauthenticated("user not authenticated"));
+        }
 
         let inner = request.into_inner();
         let key = queue_key(inner.id);
