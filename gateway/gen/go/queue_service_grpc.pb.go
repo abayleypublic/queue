@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v6.31.1
-// source: proto/queue_service.proto
+// source: queue_service.proto
 
 package gateway
 
@@ -155,5 +155,5 @@ var Queue_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "proto/queue_service.proto",
+	Metadata: "queue_service.proto",
 }

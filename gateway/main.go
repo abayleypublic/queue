@@ -11,7 +11,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
-	gw "github.com/abayleypublic/queue/gateway/gen/go/proto"
+	gw "github.com/abayleypublic/queue/gateway/gen/go"
 )
 
 type Config struct {

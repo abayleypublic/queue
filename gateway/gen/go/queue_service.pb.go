@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.36.7
 // 	protoc        v6.31.1
-// source: proto/queue_service.proto
+// source: queue_service.proto
 
 package gateway
 
@@ -32,7 +32,7 @@ type Entity struct {
 
 func (x *Entity) Reset() {
 	*x = Entity{}
-	mi := &file_proto_queue_service_proto_msgTypes[0]
+	mi := &file_queue_service_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -44,7 +44,7 @@ func (x *Entity) String() string {
 func (*Entity) ProtoMessage() {}
 
 func (x *Entity) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_queue_service_proto_msgTypes[0]
+	mi := &file_queue_service_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -57,7 +57,7 @@ func (x *Entity) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Entity.ProtoReflect.Descriptor instead.
 func (*Entity) Descriptor() ([]byte, []int) {
-	return file_proto_queue_service_proto_rawDescGZIP(), []int{0}
+	return file_queue_service_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *Entity) GetId() string {
@@ -83,7 +83,7 @@ type GetQueueRequest struct {
 
 func (x *GetQueueRequest) Reset() {
 	*x = GetQueueRequest{}
-	mi := &file_proto_queue_service_proto_msgTypes[1]
+	mi := &file_queue_service_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -95,7 +95,7 @@ func (x *GetQueueRequest) String() string {
 func (*GetQueueRequest) ProtoMessage() {}
 
 func (x *GetQueueRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_queue_service_proto_msgTypes[1]
+	mi := &file_queue_service_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -108,7 +108,7 @@ func (x *GetQueueRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetQueueRequest.ProtoReflect.Descriptor instead.
 func (*GetQueueRequest) Descriptor() ([]byte, []int) {
-	return file_proto_queue_service_proto_rawDescGZIP(), []int{1}
+	return file_queue_service_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *GetQueueRequest) GetId() string {
@@ -127,7 +127,7 @@ type GetQueueResponse struct {
 
 func (x *GetQueueResponse) Reset() {
 	*x = GetQueueResponse{}
-	mi := &file_proto_queue_service_proto_msgTypes[2]
+	mi := &file_queue_service_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -139,7 +139,7 @@ func (x *GetQueueResponse) String() string {
 func (*GetQueueResponse) ProtoMessage() {}
 
 func (x *GetQueueResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_queue_service_proto_msgTypes[2]
+	mi := &file_queue_service_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -152,7 +152,7 @@ func (x *GetQueueResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetQueueResponse.ProtoReflect.Descriptor instead.
 func (*GetQueueResponse) Descriptor() ([]byte, []int) {
-	return file_proto_queue_service_proto_rawDescGZIP(), []int{2}
+	return file_queue_service_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *GetQueueResponse) GetEntities() []*Entity {
@@ -172,7 +172,7 @@ type SetQueueRequest struct {
 
 func (x *SetQueueRequest) Reset() {
 	*x = SetQueueRequest{}
-	mi := &file_proto_queue_service_proto_msgTypes[3]
+	mi := &file_queue_service_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -184,7 +184,7 @@ func (x *SetQueueRequest) String() string {
 func (*SetQueueRequest) ProtoMessage() {}
 
 func (x *SetQueueRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_queue_service_proto_msgTypes[3]
+	mi := &file_queue_service_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -197,7 +197,7 @@ func (x *SetQueueRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SetQueueRequest.ProtoReflect.Descriptor instead.
 func (*SetQueueRequest) Descriptor() ([]byte, []int) {
-	return file_proto_queue_service_proto_rawDescGZIP(), []int{3}
+	return file_queue_service_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *SetQueueRequest) GetId() string {
@@ -222,7 +222,7 @@ type SetQueueResponse struct {
 
 func (x *SetQueueResponse) Reset() {
 	*x = SetQueueResponse{}
-	mi := &file_proto_queue_service_proto_msgTypes[4]
+	mi := &file_queue_service_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -234,7 +234,7 @@ func (x *SetQueueResponse) String() string {
 func (*SetQueueResponse) ProtoMessage() {}
 
 func (x *SetQueueResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_queue_service_proto_msgTypes[4]
+	mi := &file_queue_service_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -247,14 +247,14 @@ func (x *SetQueueResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SetQueueResponse.ProtoReflect.Descriptor instead.
 func (*SetQueueResponse) Descriptor() ([]byte, []int) {
-	return file_proto_queue_service_proto_rawDescGZIP(), []int{4}
+	return file_queue_service_proto_rawDescGZIP(), []int{4}
 }
 
-var File_proto_queue_service_proto protoreflect.FileDescriptor
+var File_queue_service_proto protoreflect.FileDescriptor
 
-const file_proto_queue_service_proto_rawDesc = "" +
+const file_queue_service_proto_rawDesc = "" +
 	"\n" +
-	"\x19proto/queue_service.proto\x12\x05queue\x1a\x1cgoogle/api/annotations.proto\",\n" +
+	"\x13queue_service.proto\x12\x05queue\x1a\x1cgoogle/api/annotations.proto\",\n" +
 	"\x06Entity\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\"!\n" +
@@ -271,26 +271,26 @@ const file_proto_queue_service_proto_rawDesc = "" +
 	"\bSetQueue\x12\x16.queue.SetQueueRequest\x1a\x17.queue.SetQueueResponse\"\x16\x82\xd3\xe4\x93\x02\x10:\x01*\x1a\v/queue/{id}B(Z&github.com/abayleypublic/queue/gatewayb\x06proto3"
 
 var (
-	file_proto_queue_service_proto_rawDescOnce sync.Once
-	file_proto_queue_service_proto_rawDescData []byte
+	file_queue_service_proto_rawDescOnce sync.Once
+	file_queue_service_proto_rawDescData []byte
 )
 
-func file_proto_queue_service_proto_rawDescGZIP() []byte {
-	file_proto_queue_service_proto_rawDescOnce.Do(func() {
-		file_proto_queue_service_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_proto_queue_service_proto_rawDesc), len(file_proto_queue_service_proto_rawDesc)))
+func file_queue_service_proto_rawDescGZIP() []byte {
+	file_queue_service_proto_rawDescOnce.Do(func() {
+		file_queue_service_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_queue_service_proto_rawDesc), len(file_queue_service_proto_rawDesc)))
 	})
-	return file_proto_queue_service_proto_rawDescData
+	return file_queue_service_proto_rawDescData
 }
 
-var file_proto_queue_service_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
-var file_proto_queue_service_proto_goTypes = []any{
+var file_queue_service_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_queue_service_proto_goTypes = []any{
 	(*Entity)(nil),           // 0: queue.Entity
 	(*GetQueueRequest)(nil),  // 1: queue.GetQueueRequest
 	(*GetQueueResponse)(nil), // 2: queue.GetQueueResponse
 	(*SetQueueRequest)(nil),  // 3: queue.SetQueueRequest
 	(*SetQueueResponse)(nil), // 4: queue.SetQueueResponse
 }
-var file_proto_queue_service_proto_depIdxs = []int32{
+var file_queue_service_proto_depIdxs = []int32{
 	0, // 0: queue.GetQueueResponse.entities:type_name -> queue.Entity
 	0, // 1: queue.SetQueueRequest.entities:type_name -> queue.Entity
 	1, // 2: queue.Queue.GetQueue:input_type -> queue.GetQueueRequest
@@ -304,26 +304,26 @@ var file_proto_queue_service_proto_depIdxs = []int32{
 	0, // [0:2] is the sub-list for field type_name
 }
 
-func init() { file_proto_queue_service_proto_init() }
-func file_proto_queue_service_proto_init() {
-	if File_proto_queue_service_proto != nil {
+func init() { file_queue_service_proto_init() }
+func file_queue_service_proto_init() {
+	if File_queue_service_proto != nil {
 		return
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_queue_service_proto_rawDesc), len(file_proto_queue_service_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_queue_service_proto_rawDesc), len(file_queue_service_proto_rawDesc)),
 			NumEnums:      0,
 			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
-		GoTypes:           file_proto_queue_service_proto_goTypes,
-		DependencyIndexes: file_proto_queue_service_proto_depIdxs,
-		MessageInfos:      file_proto_queue_service_proto_msgTypes,
+		GoTypes:           file_queue_service_proto_goTypes,
+		DependencyIndexes: file_queue_service_proto_depIdxs,
+		MessageInfos:      file_queue_service_proto_msgTypes,
 	}.Build()
-	File_proto_queue_service_proto = out.File
-	file_proto_queue_service_proto_goTypes = nil
-	file_proto_queue_service_proto_depIdxs = nil
+	File_queue_service_proto = out.File
+	file_queue_service_proto_goTypes = nil
+	file_queue_service_proto_depIdxs = nil
 }
