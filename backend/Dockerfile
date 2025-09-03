@@ -23,10 +23,12 @@ RUN set -eux; \
     else \
     echo "unsupported architecture: $TARGETARCH"; exit 1; \
     fi; \
-    cargo build --release --target $RUST_TARGET
+    cargo build --release --target $RUST_TARGET; \
+    cp target/$RUST_TARGET/release/backend /backend
 
 FROM scratch
 WORKDIR /
-ARG TARGETARCH
-COPY --from=build /app/target/aarch64-unknown-linux-musl/release/backend /backend
+
+COPY --from=build /backend /backend
+
 ENTRYPOINT ["/backend"]
