@@ -62,5 +62,5 @@ jobs:
           context: ${{ matrix.context }}
           file: ${{ matrix.file }}
           push: true
-          tags: europe-west2-docker.pkg.dev/portfolio-463406/docker-repository/queue-${{ matrix.app }}:${{ github.event.release.tag_name }}
+          tags: europe-west2-docker.pkg.dev/portfolio-463406/docker-repository/queue_${{ matrix.app }}:${{ github.event.release.tag_name }}
           platforms: linux/amd64,linux/arm64

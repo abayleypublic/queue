@@ -23,9 +23,9 @@ spec:
             - name: API_PORT
               value: "80"
             - name: MCP_ADDRESS
-              value: "http://mcp:8002/mcp"
+              value: "http://mcp/mcp"
             - name: OPENAI_API_BASE
-              value: "http://openai:80/v1"
+              value: "https://api.openai.com/v1"
             - name: OPENAI_API_MODEL
               value: "gpt-5-mini"
             - name: TEMPORAL_HOST
