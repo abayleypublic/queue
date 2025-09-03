@@ -43,7 +43,7 @@ spec:
             - name: OPENAI_API_MODEL
               value: "gpt-5-mini"
             - name: TEMPORAL_HOST
-              value: "temporal.temporal.svc.cluster.local"
+              value: "temporal-frontend.temporal.svc.cluster.local"
             - name: TEMPORAL_NAMESPACE
               value: "staging"
             - name: TEMPORAL_TLS_CERT
