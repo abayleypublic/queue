@@ -85,7 +85,6 @@ apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: queue-temporal-tls-client
-  namespace: temporal
 spec:
   secretName: queue-temporal-tls-client
   duration: 8760h
