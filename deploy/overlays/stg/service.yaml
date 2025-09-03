@@ -94,4 +94,4 @@ spec:
     - client auth
   issuerRef:
     name: temporal-ca-issuer
-    kind: Issuer
+    kind: ClusterIssuer
