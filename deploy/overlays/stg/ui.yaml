@@ -1,3 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+    name: ui
+spec:
+    selector:
+        app: ui
+    ports:
+        - port: 80
+          targetPort: 80
+          protocol: TCP
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -24,15 +36,3 @@ spec:
               value: "80"
       imagePullSecrets:
         - name: gcp-pull-secret
----
-apiVersion: v1
-kind: Service
-metadata:
-    name: ui
-spec:
-    selector:
-        app: ui
-    ports:
-        - port: 80
-          targetPort: 80
-          protocol: TCP
