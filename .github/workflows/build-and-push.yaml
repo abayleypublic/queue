@@ -1,0 +1,66 @@
+name: Build and Push on Release
+on:
+  release:
+    types: [released]
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: "read"
+      id-token: "write"
+
+    strategy:
+      matrix:
+        include:
+          - app: backend
+            context: .
+            file: backend/Dockerfile
+          - app: gateway
+            context: gateway
+            file: gateway/Dockerfile
+          - app: mcp
+            context: mcp
+            file: mcp/Dockerfile
+          - app: service
+            context: service
+            file: service/Dockerfile
+          - app: ui
+            context: ui
+            file: ui/Dockerfile
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: "${{ github.event.release.tag_name }}"
+
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          token_format: access_token
+          workload_identity_provider: "projects/416469577734/locations/global/workloadIdentityPools/github/providers/actions"
+          service_account: "github-actions@portfolio-463406.iam.gserviceaccount.com"
+
+      - name: Docker Login
+        uses: docker/login-action@v3
+        with:
+          registry: europe-west2-docker.pkg.dev
+          username: oauth2accesstoken
+          password: ${{ steps.auth.outputs.access_token }}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push ${{ matrix.app }}
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.file }}
+          push: true
+          tags: europe-west2-docker.pkg.dev/portfolio-463406/docker-repository/queue-${{ matrix.app }}:${{ github.event.release.tag_name }}
+          platforms: linux/amd64,linux/arm64
