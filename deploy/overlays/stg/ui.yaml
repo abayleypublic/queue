@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ui
+  labels:
+    app: ui
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ui
+  template:
+    metadata:
+      labels:
+        app: ui
+    spec:
+      containers:
+        - name: ui
+          image: europe-west2-docker.pkg.dev/portfolio-463406/docker-repository/queue_ui
+          ports:
+            - containerPort: 80
+          env:
+            - name: PORT
+              value: "80"
+      imagePullSecrets:
+        - name: gcp-pull-secret

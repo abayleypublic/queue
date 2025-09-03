@@ -25,7 +25,7 @@ json_schema_types_to_python: dict[str, type] = {
 }
 
 class APIConfig(BaseSettings):
-    model_config = SettingsConfigDict(env_prefix="service_api_")
+    model_config = SettingsConfigDict(env_prefix="api_")
 
     port: int = 8003
 
@@ -39,7 +39,7 @@ class Property(BaseModel):
         return f"{self.name} ({self.type.__name__}): {self.description}"
 
 class MCPConfig(BaseSettings):
-    model_config = SettingsConfigDict(env_prefix="service_mcp_")
+    model_config = SettingsConfigDict(env_prefix="mcp_")
 
     address: str = "http://localhost:8002/mcp"
     _tools: List[MCPTool] = []
@@ -139,7 +139,7 @@ class MCPConfig(BaseSettings):
         return [self._mcp_tool_to_activity(tool) for tool in self._tools]
 
 class OpenAIConfig(BaseSettings):
-    model_config = SettingsConfigDict(env_prefix="service_openai_")
+    model_config = SettingsConfigDict(env_prefix="openai_")
 
     api_key: str = "1234"
     api_base: str = "http://localhost:11434/v1"
@@ -159,7 +159,7 @@ class OpenAIConfig(BaseSettings):
 
 
 class TemporalConfig(BaseSettings):
-    model_config = SettingsConfigDict(env_prefix="service_temporal_")
+    model_config = SettingsConfigDict(env_prefix="temporal_")
 
     host: str = "http://localhost"
     port: int = 7233
@@ -167,7 +167,7 @@ class TemporalConfig(BaseSettings):
     task_queue: str = "queue"
 
 class TemporalWorkerConfig(BaseSettings):
-    model_config = SettingsConfigDict(env_prefix="service_worker_")
+    model_config = SettingsConfigDict(env_prefix="worker_")
 
 class Config(BaseModel):
     api: APIConfig = APIConfig()

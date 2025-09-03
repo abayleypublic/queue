@@ -15,13 +15,13 @@ import (
 )
 
 type Config struct {
-	Backend string `envconfig:"backend" default:"localhost:8001"`
-	Port    int    `envconfig:"port" default:"8004"`
+	Backend string `envconfig:"BACKEND" default:"localhost:8001"`
+	Port    int    `envconfig:"PORT" default:"8004"`
 }
 
 func main() {
 	var cfg Config
-	if err := envconfig.Process("gateway_", &cfg); err != nil {
+	if err := envconfig.Process("", &cfg); err != nil {
 		log.Fatal().Err(err).Msg("failed to process config")
 	}
 

@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service
+  labels:
+    app: service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: service
+  template:
+    metadata:
+      labels:
+        app: service
+    spec:
+      containers:
+        - name: service
+          image: europe-west2-docker.pkg.dev/portfolio-463406/docker-repository/queue_service
+          ports:
+            - containerPort: 80
+          env:
+            - name: API_PORT
+              value: "80"
+            - name: MCP_ADDRESS
+              value: "http://mcp:8002/mcp"
+            - name: OPENAI_API_BASE
+              value: "http://openai:80/v1"
+            - name: OPENAI_API_MODEL
+              value: "gpt-5-mini"
+            - name: TEMPORAL_HOST
+              value: "http://temporal.svc.cluster.local"
+            - name: TEMPORAL_NAMESPACE
+              value: "staging"
+          envFrom:
+            - secretRef:
+                name: service-secrets
+      imagePullSecrets:
+        - name: gcp-pull-secret
+---
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: service-secrets
+spec:
+  refreshInterval: "1h"
+  secretStoreRef:
+    name: oci-secret-store
+    kind: ClusterSecretStore
+  target:
+    name: service-secrets
+  data:
+    - secretKey: OPENAI_API_KEY
+      remoteRef:
+        key: stg_queue_openai_api_key
