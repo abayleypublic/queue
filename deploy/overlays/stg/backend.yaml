@@ -23,7 +23,7 @@ spec:
             - name: ADDRESS
               value: "[::1]:80"
             - name: REDIS_URL
-              value: redis://valkey:6379
+              value: redis://valkey.valkey:6379
       imagePullSecrets:
         - name: gcp-pull-secret
 ---
