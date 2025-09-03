@@ -1,0 +1,19 @@
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: gcp-pull-secret
+spec:
+  refreshInterval: 5m
+  secretStoreRef:
+    name: kubernetes-secret-store
+    kind: ClusterSecretStore
+  target:
+    name: gcp-pull-secret
+    creationPolicy: Owner
+    template:
+      type: kubernetes.io/dockerconfigjson
+  data:
+    - secretKey: .dockerconfigjson
+      remoteRef:
+        key: gcp-pull-secret
+        property: .dockerconfigjson

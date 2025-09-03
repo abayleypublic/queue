@@ -28,7 +28,7 @@ fn default_redis_url() -> String {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let cfg = match envy::prefixed("BACKEND_").from_env::<Config>() {
+    let cfg = match envy::prefixed("").from_env::<Config>() {
         Ok(config) => config,
         Err(error) => {
             error!("configuration error: {}", error);

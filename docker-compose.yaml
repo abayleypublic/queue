@@ -8,7 +8,7 @@ services:
       - "8001:8001"
     environment:
       - RUST_LOG=info
-      - BACKEND_REDIS_URL=redis://valkey:6379
+      - REDIS_URL=redis://valkey:6379
     depends_on:
       - valkey
 
@@ -18,7 +18,7 @@ services:
     ports:
       - "8004:8004"
     environment:
-      - GATEWAY_BACKEND=backend:8001
+      - BACKEND=backend:8001
     depends_on:
       - backend
 
@@ -28,7 +28,7 @@ services:
     ports:
       - "8002:8002"
     environment:
-      - MCP_BACKEND_HOST=backend
+      - BACKEND_HOST=backend
     depends_on:
       - backend
 
@@ -38,7 +38,7 @@ services:
     ports:
       - "8003:8003"
     environment:
-      - SERVICE_MCP_ADDRESS=http://mcp:8002/mcp
+      - MCP_ADDRESS=http://mcp:8002/mcp
     depends_on:
       - backend
 

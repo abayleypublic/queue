@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mcp
+  labels:
+    app: mcp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mcp
+  template:
+    metadata:
+      labels:
+        app: mcp
+    spec:
+      containers:
+        - name: mcp
+          image: europe-west2-docker.pkg.dev/portfolio-463406/docker-repository/queue_mcp
+          ports:
+            - containerPort: 80
+          env:
+            - name: BACKEND_HOST
+              value: "[::1]:80"
+            - name: BACKEND_PORT
+              value: "80"
+            - name: SERVER_PORT
+              value: "80"
+      imagePullSecrets:
+        - name: gcp-pull-secret

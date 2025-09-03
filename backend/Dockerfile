@@ -28,6 +28,5 @@ RUN set -eux; \
 FROM scratch
 WORKDIR /
 ARG TARGETARCH
-# COPY --from=build /app/target/x86_64-unknown-linux-musl/release/backend /backend
 COPY --from=build /app/target/aarch64-unknown-linux-musl/release/backend /backend
 ENTRYPOINT ["/backend"]
