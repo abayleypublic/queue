@@ -7,7 +7,7 @@ from agents import OpenAIProvider
 from agents.mcp import  MCPServerStreamableHttp, MCPServerStreamableHttpParams
 from pydantic import BaseModel
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from temporalio.client import Client
+from temporalio.client import Client, TLSConfig
 from temporalio.common import RetryPolicy
 from temporalio.activity import _Definition
 from temporalio.contrib.pydantic import pydantic_data_converter
@@ -166,6 +166,32 @@ class TemporalConfig(BaseSettings):
     namespace: str = "default"
     task_queue: str = "queue"
 
+    tls_cert: str | None = None
+    tls_key: str | None = None
+    tls_ca_cert: str | None = None
+    tls_domain: str | None = None
+
+    @property
+    def tls_config(self) -> TLSConfig | None:
+        if not (self.tls_cert and self.tls_key and self.tls_ca_cert):
+            return None
+        
+        with open(self.tls_cert, "rb") as f:
+            client_cert = f.read()
+
+        with open(self.tls_key, "rb") as f:
+            client_private_key = f.read()
+
+        with open(self.tls_ca_cert, "rb") as f:
+            server_root_ca_cert = f.read()
+
+        return TLSConfig(
+            client_cert=client_cert,
+            client_private_key=client_private_key,
+            server_root_ca_cert=server_root_ca_cert,
+            domain=self.tls_domain,
+        )
+
 class TemporalWorkerConfig(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="worker_")
 
@@ -182,6 +208,7 @@ class Config(BaseModel):
             f"{self.temporal.host}:{self.temporal.port}",
             namespace=self.temporal.namespace,
             data_converter=pydantic_data_converter,
+            tls=self.temporal.tls_config,
             plugins=[OpenAIAgentsPlugin(
                 model_params=ModelActivityParameters(
                     start_to_close_timeout=timedelta(seconds=90),

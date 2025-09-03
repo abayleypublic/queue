@@ -46,11 +46,24 @@ spec:
               value: "temporal.temporal.svc.cluster.local"
             - name: TEMPORAL_NAMESPACE
               value: "staging"
+            - name: TEMPORAL_TLS_CERT
+              value: /etc/temporal/tls/tls.crt
+            - name: TEMPORAL_TLS_KEY
+              value: /etc/temporal/tls/tls.key
+            - name: TEMPORAL_TLS_CA
+              value: /etc/temporal/tls/ca.crt
           envFrom:
             - secretRef:
                 name: service-secrets
+          volumeMounts:
+            - name: tls-secrets
+              mountPath: /etc/secrets/tls
       imagePullSecrets:
         - name: gcp-pull-secret
+      volumes:
+        - name: tls-secrets
+          secret:
+            secretName: queue-temporal-tls-client
 ---
 apiVersion: external-secrets.io/v1
 kind: ExternalSecret
@@ -67,3 +80,19 @@ spec:
     - secretKey: OPENAI_API_KEY
       remoteRef:
         key: stg_queue_openai_api_key
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: queue-temporal-tls-client
+  namespace: temporal
+spec:
+  secretName: queue-temporal-tls-client
+  duration: 8760h
+  renewBefore: 720h
+  commonName: queue-temporal-tls-client
+  usages:
+    - client auth
+  issuerRef:
+    name: temporal-ca-issuer
+    kind: Issuer
