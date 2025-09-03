@@ -45,7 +45,7 @@ spec:
             - name: TEMPORAL_HOST
               value: "temporal-frontend.temporal.svc.cluster.local"
             - name: TEMPORAL_PORT
-              value: "7234"
+              value: "7233"
             - name: TEMPORAL_NAMESPACE
               value: "staging"
             - name: TEMPORAL_TLS_CERT
