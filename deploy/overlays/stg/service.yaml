@@ -60,12 +60,12 @@ spec:
             - secretRef:
                 name: service-secrets
           volumeMounts:
-            - name: tls-secrets
-              mountPath: /etc/secrets/tls
+            - name: temporal-tls-secrets
+              mountPath: /etc/temporal/tls
       imagePullSecrets:
         - name: gcp-pull-secret
       volumes:
-        - name: tls-secrets
+        - name: temporal-tls-secrets
           secret:
             secretName: queue-temporal-tls-client
 ---
