@@ -52,7 +52,7 @@ spec:
               value: /etc/temporal/tls/tls.crt
             - name: TEMPORAL_TLS_KEY
               value: /etc/temporal/tls/tls.key
-            - name: TEMPORAL_TLS_CA
+            - name: TEMPORAL_TLS_CA_CERT
               value: /etc/temporal/tls/ca.crt
             - name: TEMPORAL_TLS_DOMAIN
               value: temporal
