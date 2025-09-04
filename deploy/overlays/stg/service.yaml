@@ -54,6 +54,8 @@ spec:
               value: /etc/temporal/tls/tls.key
             - name: TEMPORAL_TLS_CA
               value: /etc/temporal/tls/ca.crt
+            - name: TEMPORAL_TLS_DOMAIN
+              value: temporal
           envFrom:
             - secretRef:
                 name: service-secrets
