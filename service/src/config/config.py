@@ -7,7 +7,7 @@ from agents import OpenAIProvider
 from agents.mcp import  MCPServerStreamableHttp, MCPServerStreamableHttpParams
 from pydantic import BaseModel
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from temporalio.client import Client
+from temporalio.client import Client, TLSConfig
 from temporalio.common import RetryPolicy
 from temporalio.activity import _Definition
 from temporalio.contrib.pydantic import pydantic_data_converter
@@ -25,8 +25,9 @@ json_schema_types_to_python: dict[str, type] = {
 }
 
 class APIConfig(BaseSettings):
-    model_config = SettingsConfigDict(env_prefix="service_api_")
+    model_config = SettingsConfigDict(env_prefix="api_")
 
+    host: str = "0.0.0.0"
     port: int = 8003
 
 class Property(BaseModel):
@@ -39,7 +40,7 @@ class Property(BaseModel):
         return f"{self.name} ({self.type.__name__}): {self.description}"
 
 class MCPConfig(BaseSettings):
-    model_config = SettingsConfigDict(env_prefix="service_mcp_")
+    model_config = SettingsConfigDict(env_prefix="mcp_")
 
     address: str = "http://localhost:8002/mcp"
     _tools: List[MCPTool] = []
@@ -139,7 +140,7 @@ class MCPConfig(BaseSettings):
         return [self._mcp_tool_to_activity(tool) for tool in self._tools]
 
 class OpenAIConfig(BaseSettings):
-    model_config = SettingsConfigDict(env_prefix="service_openai_")
+    model_config = SettingsConfigDict(env_prefix="openai_")
 
     api_key: str = "1234"
     api_base: str = "http://localhost:11434/v1"
@@ -159,15 +160,41 @@ class OpenAIConfig(BaseSettings):
 
 
 class TemporalConfig(BaseSettings):
-    model_config = SettingsConfigDict(env_prefix="service_temporal_")
+    model_config = SettingsConfigDict(env_prefix="temporal_")
 
     host: str = "http://localhost"
     port: int = 7233
     namespace: str = "default"
     task_queue: str = "queue"
 
+    tls_cert: str | None = None
+    tls_key: str | None = None
+    tls_ca_cert: str | None = None
+    tls_domain: str | None = None
+
+    @property
+    def tls_config(self) -> TLSConfig | None:
+        if not (self.tls_cert and self.tls_key and self.tls_ca_cert):
+            return None
+        
+        with open(self.tls_cert, "rb") as f:
+            client_cert = f.read()
+
+        with open(self.tls_key, "rb") as f:
+            client_private_key = f.read()
+
+        with open(self.tls_ca_cert, "rb") as f:
+            server_root_ca_cert = f.read()
+
+        return TLSConfig(
+            client_cert=client_cert,
+            client_private_key=client_private_key,
+            server_root_ca_cert=server_root_ca_cert,
+            domain=self.tls_domain,
+        )
+
 class TemporalWorkerConfig(BaseSettings):
-    model_config = SettingsConfigDict(env_prefix="service_worker_")
+    model_config = SettingsConfigDict(env_prefix="worker_")
 
 class Config(BaseModel):
     api: APIConfig = APIConfig()
@@ -182,6 +209,7 @@ class Config(BaseModel):
             f"{self.temporal.host}:{self.temporal.port}",
             namespace=self.temporal.namespace,
             data_converter=pydantic_data_converter,
+            tls=self.temporal.tls_config,
             plugins=[OpenAIAgentsPlugin(
                 model_params=ModelActivityParameters(
                     start_to_close_timeout=timedelta(seconds=90),

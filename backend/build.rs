@@ -6,7 +6,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     tonic_prost_build::configure()
         .file_descriptor_set_path(out_dir.join("queue_descriptor.bin"))
         .type_attribute(".", "#[derive(serde::Serialize,serde::Deserialize)]")
-        .compile_protos(&["proto/queue_service.proto"], &["proto"])
+        .compile_protos(&["../proto/queue_service.proto"], &["../proto"])
         .unwrap();
     Ok(())
 }
