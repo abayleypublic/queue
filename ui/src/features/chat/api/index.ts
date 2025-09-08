@@ -7,6 +7,9 @@ interface GetChatArgs {
 
 export const GetChat = async ({ id }: GetChatArgs): Promise<Array<Message>> => {
     const response = await fetch(`${Config.apiURL}/service/messages/${id}`)
+    if (response.status === 404) {
+        return []
+    }
     return await response.json()
 }
 
