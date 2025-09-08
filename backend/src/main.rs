@@ -28,6 +28,7 @@ fn default_redis_url() -> String {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    env_logger::init();
     let cfg = match envy::prefixed("").from_env::<Config>() {
         Ok(config) => config,
         Err(error) => {
