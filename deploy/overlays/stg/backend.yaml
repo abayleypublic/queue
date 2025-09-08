@@ -38,6 +38,8 @@ spec:
               value: "[::1]:80"
             - name: REDIS_URL
               value: "redis://valkey:6379"
+            - name: RUST_LOG
+              value: "debug"
       imagePullSecrets:
         - name: gcp-pull-secret
 ---
