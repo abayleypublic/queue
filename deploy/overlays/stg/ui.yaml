@@ -17,7 +17,7 @@ metadata:
 data:
   config.json: |
     {
-      "api_url": "https://queue.stg.austinbayley.com",
+      "api_url": "https://queue.stg.austinbayley.co.uk",
       "queue": "default",
       "user": "austin"
     }
