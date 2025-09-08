@@ -27,6 +27,7 @@ json_schema_types_to_python: dict[str, type] = {
 class APIConfig(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="api_")
 
+    host: str = "0.0.0.0"
     port: int = 8003
 
 class Property(BaseModel):
