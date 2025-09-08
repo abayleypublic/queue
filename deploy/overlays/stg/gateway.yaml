@@ -37,6 +37,6 @@ spec:
             - name: PORT
               value: "80"
             - name: BACKEND
-              value: "http://backend"
+              value: "backend"
       imagePullSecrets:
         - name: gcp-pull-secret
