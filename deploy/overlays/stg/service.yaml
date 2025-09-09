@@ -40,7 +40,7 @@ spec:
               value: "http://mcp/mcp"
             - name: OPENAI_API_BASE
               value: "https://api.openai.com/v1"
-            - name: OPENAI_API_MODEL
+            - name: OPENAI_MODEL
               value: "gpt-5-mini"
             - name: TEMPORAL_HOST
               value: "temporal-frontend.temporal.svc.cluster.local"
