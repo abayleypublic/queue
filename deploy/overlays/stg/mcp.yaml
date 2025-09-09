@@ -35,7 +35,7 @@ spec:
             - containerPort: 80
           env:
             - name: BACKEND_HOST
-              value: "http://backend"
+              value: "backend"
             - name: BACKEND_PORT
               value: "80"
             - name: SERVER_HOST
