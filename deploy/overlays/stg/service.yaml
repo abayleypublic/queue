@@ -42,6 +42,8 @@ spec:
               value: "https://api.openai.com/v1"
             - name: OPENAI_MODEL
               value: "gpt-5-mini"
+            - name: OTEL_LOG_LEVEL
+              value: "debug"
             - name: OTEL_TRACES_EXPORTER
               value: "none"
             - name: OTEL_METRICS_EXPORTER
