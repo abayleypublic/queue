@@ -42,12 +42,14 @@ spec:
               value: "https://api.openai.com/v1"
             - name: OPENAI_MODEL
               value: "gpt-5-mini"
-            - name: OTEL_SERVICE_NAME
-              value: "service"
-            - name: OTEL_EXPORTER_OTLP_ENDPOINT
-              value: "http://otel-collector.observability.svc.cluster.local:4317"
-            - name: OTEL_EXPORTER_OTLP_PROTOCOL
-              value: "grpc"
+            - name: OTEL_TRACES_EXPORTER
+              value: "none"
+            - name: OTEL_METRICS_EXPORTER
+              value: "none"
+            - name: OTEL_LOGS_EXPORTER
+              value: "none"
+            - name: OTEL_TRACES_SAMPLER
+              value: "always_off"
             - name: TEMPORAL_HOST
               value: "temporal-frontend.temporal.svc.cluster.local"
             - name: TEMPORAL_PORT
