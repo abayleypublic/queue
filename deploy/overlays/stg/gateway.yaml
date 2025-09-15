@@ -27,9 +27,6 @@ spec:
     metadata:
       labels:
         app: gateway
-      annotations:
-        instrumentation.opentelemetry.io/inject-go: "observability/instrumentation"
-        instrumentation.opentelemetry.io/otel-go-auto-target-exe: "/gateway"
     spec:
       containers:
         - name: gateway
