@@ -28,7 +28,7 @@ spec:
       labels:
         app: mcp
       annotations:
-        instrumentation.opentelemetry.io/inject-python: "true"
+        instrumentation.opentelemetry.io/inject-python: "observability/instrumentation"
     spec:
       containers:
         - name: mcp
