@@ -9,4 +9,3 @@ resources:
   - mcp.yaml
   - service.yaml
   - ui.yaml
-  - instrumentation.yaml
