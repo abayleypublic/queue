@@ -37,6 +37,8 @@ spec:
     metadata:
       labels:
         app: ui
+      annotations:
+        instrumentation.opentelemetry.io/inject-nginx: "true"
     spec:
       containers:
         - name: ui
