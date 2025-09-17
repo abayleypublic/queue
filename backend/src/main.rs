@@ -1,8 +1,12 @@
+#![warn(unused_extern_crates)]
+
 mod service;
 
-use log::{error, info};
 use serde::Deserialize;
 use tonic::transport::Server;
+use tower_http::trace::TraceLayer;
+use tracing::{error, info};
+use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 pub mod proto {
     pub(crate) const FILE_DESCRIPTOR_SET: &[u8] =
@@ -26,9 +30,22 @@ fn default_redis_url() -> String {
     "redis://127.0.0.1/".to_string()
 }
 
+fn init_tracing() -> Result<(), Box<dyn std::error::Error>> {
+    let env_filter = tracing_subscriber::EnvFilter::try_from_default_env()
+        .unwrap_or_else(|_| "info,tower_http=info,tonic=info".into());
+
+    tracing_subscriber::registry()
+        .with(env_filter)
+        .with(tracing_subscriber::fmt::layer())
+        .init();
+
+    Ok(())
+}
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    env_logger::init();
+    init_tracing()?;
+
     let cfg = match envy::prefixed("").from_env::<Config>() {
         Ok(config) => config,
         Err(error) => {
@@ -51,6 +68,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     info!("starting server on {}", cfg.address);
 
     Server::builder()
+        .layer(TraceLayer::new_for_grpc())
         .add_service(service::queue::queue_server::QueueServer::new(
             queue_service,
         ))

@@ -4,7 +4,6 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-env_logger = "0.11.8"
 envy = "0.4.2"
 log = "0.4.27"
 prost = "0.14.1"
@@ -15,7 +14,9 @@ tokio = { version = "1.47.1", features = ["macros", "rt-multi-thread"] }
 tonic = "0.14.1"
 tonic-prost = "0.14.1"
 tonic-reflection = "0.14.1"
+tower-http = { version = "0.5", features = ["trace"] }
 tracing = "0.1.41"
+tracing-subscriber = { version = "0.3.20", features = ["env-filter", "fmt"] }
 
 [build-dependencies]
 tonic-prost-build = "0.14.1"
