@@ -2,10 +2,15 @@
 
 mod service;
 
+use http::Request;
+use opentelemetry::trace::TracerProvider;
+use opentelemetry::{global, propagation::Extractor};
+use opentelemetry_sdk::{propagation::TraceContextPropagator, trace::SdkTracerProvider};
 use serde::Deserialize;
 use tonic::transport::Server;
 use tower_http::trace::TraceLayer;
 use tracing::{error, info};
+use tracing_opentelemetry::OpenTelemetrySpanExt;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 pub mod proto {
@@ -31,15 +36,32 @@ fn default_redis_url() -> String {
 }
 
 fn init_tracing() -> Result<(), Box<dyn std::error::Error>> {
+    global::set_text_map_propagator(TraceContextPropagator::new());
+
+    let provider = SdkTracerProvider::builder().build();
+    let tracer = provider.tracer("backend");
+    global::set_tracer_provider(provider);
+
     let env_filter = tracing_subscriber::EnvFilter::try_from_default_env()
         .unwrap_or_else(|_| "info,tower_http=info,tonic=info".into());
 
     tracing_subscriber::registry()
         .with(env_filter)
         .with(tracing_subscriber::fmt::layer())
+        .with(tracing_opentelemetry::layer().with_tracer(tracer))
         .init();
 
     Ok(())
+}
+
+struct HeaderExtractor<'a>(&'a http::HeaderMap);
+impl<'a> Extractor for HeaderExtractor<'a> {
+    fn get(&self, key: &str) -> Option<&str> {
+        self.0.get(key)?.to_str().ok()
+    }
+    fn keys(&self) -> Vec<&str> {
+        self.0.keys().map(|k| k.as_str()).collect()
+    }
 }
 
 #[tokio::main]
@@ -67,8 +89,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let addr = cfg.address.parse()?;
     info!("starting server on {}", cfg.address);
 
+    let grpc_trace = TraceLayer::new_for_grpc().make_span_with(|req: &Request<_>| {
+        let parent_cx =
+            global::get_text_map_propagator(|p| p.extract(&HeaderExtractor(req.headers())));
+
+        let span = tracing::info_span!("grpc.request", path = %req.uri().path());
+        span.set_parent(parent_cx);
+        span
+    });
+
     Server::builder()
-        .layer(TraceLayer::new_for_grpc())
+        .layer(grpc_trace)
         .add_service(service::queue::queue_server::QueueServer::new(
             queue_service,
         ))
