@@ -27,6 +27,8 @@ spec:
     metadata:
       labels:
         app: gateway
+      annotations:
+        ebpf.instrument: "true"
     spec:
       containers:
         - name: gateway

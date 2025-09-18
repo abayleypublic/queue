@@ -38,7 +38,7 @@ spec:
       labels:
         app: ui
       annotations:
-        instrumentation.opentelemetry.io/inject-nginx: "observability/instrumentation"
+        ebpf.instrument: "true"
     spec:
       containers:
         - name: ui

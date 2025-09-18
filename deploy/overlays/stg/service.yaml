@@ -28,7 +28,7 @@ spec:
       labels:
         app: service
       annotations:
-        instrumentation.opentelemetry.io/inject-python: "observability/instrumentation"
+        ebpf.instrument: "python"
     spec:
       containers:
         - name: service

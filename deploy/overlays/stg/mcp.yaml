@@ -28,7 +28,7 @@ spec:
       labels:
         app: mcp
       annotations:
-        instrumentation.opentelemetry.io/inject-python: "observability/instrumentation"
+        ebpf.instrument: "python"
     spec:
       containers:
         - name: mcp
