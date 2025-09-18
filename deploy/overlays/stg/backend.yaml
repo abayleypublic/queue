@@ -74,6 +74,8 @@ spec:
     metadata:
       labels:
         app: valkey
+      annotations:
+        ebpf.instrument: "true"
     spec:
       containers:
         - name: valkey
