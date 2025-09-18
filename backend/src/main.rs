@@ -93,7 +93,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let parent_cx =
             global::get_text_map_propagator(|p| p.extract(&HeaderExtractor(req.headers())));
 
-        let span = tracing::info_span!("grpc.request", path = %req.uri().path());
+        let span = tracing::info_span!(
+            "rpc.server",
+            otel.name = %req.uri().path(),
+            otel.kind = "server",
+            "rpc.system" = "grpc",
+            "rpc.service" = "queue.Queue",
+            "rpc.method" = %req.uri().path(),
+        );
+
         span.set_parent(parent_cx);
         span
     });
