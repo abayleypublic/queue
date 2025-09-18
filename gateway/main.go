@@ -4,11 +4,14 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/rs/zerolog/log"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/propagation"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
@@ -21,7 +24,12 @@ type Config struct {
 }
 
 func CustomMatcher(key string) (string, bool) {
-	return runtime.DefaultHeaderMatcher(key)
+	switch strings.ToLower(key) {
+	case "traceparent", "tracestate":
+		return key, true
+	default:
+		return runtime.DefaultHeaderMatcher(key)
+	}
 }
 
 func main() {
@@ -33,6 +41,8 @@ func main() {
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
+
+	otel.SetTextMapPropagator(propagation.TraceContext{})
 
 	mux := runtime.NewServeMux(
 		runtime.WithIncomingHeaderMatcher(CustomMatcher),
