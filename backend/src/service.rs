@@ -7,7 +7,8 @@ use queue::{Entity, GetQueueRequest, GetQueueResponse, SetQueueRequest, SetQueue
 use redis::AsyncCommands;
 use redis::aio::MultiplexedConnection;
 use tonic::{Request, Response, Status};
-use tracing::{debug, instrument};
+use tracing::Instrument;
+use tracing::{debug, info_span};
 
 #[derive(Debug, Clone)]
 pub struct QueueService {
@@ -27,7 +28,6 @@ impl QueueService {
 
 #[tonic::async_trait]
 impl Queue for QueueService {
-    #[instrument(skip(self))]
     async fn get_queue(
         &self,
         request: Request<GetQueueRequest>,
@@ -40,6 +40,7 @@ impl Queue for QueueService {
 
         let res: Vec<String> = conn
             .lrange(&key, 0, -1)
+            .instrument(info_span!("redis", cmd = "LRANGE", key = %key))
             .await
             .map_err(|e| Status::internal(format!("Redis error: {e}")))?;
 
@@ -51,7 +52,6 @@ impl Queue for QueueService {
         Ok(Response::new(GetQueueResponse { entities }))
     }
 
-    #[instrument(skip(self))]
     async fn set_queue(
         &self,
         request: Request<SetQueueRequest>,
@@ -65,6 +65,7 @@ impl Queue for QueueService {
 
         let _: i64 = conn
             .del(&key)
+            .instrument(info_span!("redis", cmd = "DEL", key = %key))
             .await
             .map_err(|e| Status::internal(format!("Redis error on delete: {e}")))?;
 
@@ -78,8 +79,10 @@ impl Queue for QueueService {
             .filter_map(|entity| serde_json::to_string(&entity).ok())
             .collect();
 
+        let span = info_span!("redis", cmd = "RPUSH", key = %key, count = entities.len());
         let _: i64 = conn
             .rpush(&key, entities)
+            .instrument(span)
             .await
             .map_err(|e| Status::internal(format!("Redis error on push: {e}")))?;
 
