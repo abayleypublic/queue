@@ -9,6 +9,21 @@ spec:
   hostnames:
     - "queue.stg.austinbayley.co.uk"
   rules:
+    - name: messages-post
+      matches:
+        - method: POST
+          path:
+            type: PathPrefix
+            value: /service/messages/
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: ''
+      backendRefs:
+        - name: service
+          port: 80
     - matches:
         - path:
             type: PathPrefix
@@ -62,3 +77,27 @@ spec:
         - name: oauth2-proxy
           namespace: stg-auth
           port: 4180
+---
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: BackendTrafficPolicy
+metadata:
+  name: stg-policy-httproute
+spec:
+  mergeType: StrategicMerge
+  rateLimit:
+    type: Global
+    global:
+      rules:
+      - clientSelectors:
+        - sourceCIDR:
+            value: 0.0.0.0/0
+            type: Distinct
+        shared: false
+        limit:
+          requests: 1
+          unit: Minute
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: stg-queue-protected
+      sectionName: messages-post
