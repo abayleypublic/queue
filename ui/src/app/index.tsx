@@ -51,7 +51,7 @@ const App = () => {
   return (
     <ThemeProvider>
       <Layout>
-        <div className="h-full grid grid-rows-[1fr_auto] gap-y-4">
+        <div className="h-full grid grid-rows-[1fr_auto] gap-y-4 mx-2 md:mx-0">
           <div className="flex flex-col gap-4 mt-2">
             {
               queueLoading && <div className="flex justify-center"> <Spinner variant="ring" /> </div>
