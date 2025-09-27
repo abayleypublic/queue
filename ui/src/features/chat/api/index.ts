@@ -18,8 +18,8 @@ interface SendMessageArgs {
     message: string
 }
 
-export const SendMessage = async ({ id, message }: SendMessageArgs): Promise<void> => {
-    await fetch(`${Config.apiURL}/service/messages/${id}`, {
+export const SendMessage = async ({ id, message }: SendMessageArgs): Promise<Response> => {
+    return await fetch(`${Config.apiURL}/service/messages/${id}`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
