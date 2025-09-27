@@ -1,7 +1,6 @@
 #![warn(unused_extern_crates)]
 
 mod api;
-mod service;
 mod user;
 
 use api::middleware::auth_interceptor;
