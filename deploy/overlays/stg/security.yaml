@@ -7,6 +7,9 @@ spec:
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
       name: stg-queue-protected
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: stg-queue-small-rate-limit
   cors:
     allowOrigins:
       - "https://queue.stg.austinbayley.co.uk"
