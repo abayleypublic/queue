@@ -51,3 +51,4 @@ spec:
   cors:
     allowOrigins:
       - "https://queue.stg.austinbayley.co.uk"
+      - "http://localhost:5173"
