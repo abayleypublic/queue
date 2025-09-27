@@ -57,5 +57,5 @@ spec:
       - POST
       - OPTIONS
     allowOrigins:
-      - https://queue.stg.austinbayley.co.uk
-      - http://localhost:5173
+      - "https://queue.stg.austinbayley.co.uk"
+      - "http://localhost:5173"
