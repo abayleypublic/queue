@@ -8,6 +8,7 @@
  - Multi tenancy on backend (ensure updates don't interrupt one another)
  - Add health checks
  - Feedback loop on chats
+ - Fix context propagation to backend service
 
 ## Architecture
 

@@ -27,6 +27,8 @@ spec:
     metadata:
       labels:
         app: service
+      annotations:
+        instrumentation.opentelemetry.io/inject-python: "observability/instrumentation"
     spec:
       containers:
         - name: service
@@ -40,8 +42,14 @@ spec:
               value: "http://mcp/mcp"
             - name: OPENAI_API_BASE
               value: "https://api.openai.com/v1"
-            - name: OPENAI_API_MODEL
+            - name: OPENAI_MODEL
               value: "gpt-5-mini"
+            - name: OTEL_LOG_LEVEL
+              value: "debug"
+            - name: OTEL_TRACES_SAMPLER
+              value: "parentbased_traceidratio"
+            - name: OTEL_TRACES_SAMPLER_ARG
+              value: "0"
             - name: TEMPORAL_HOST
               value: "temporal-frontend.temporal.svc.cluster.local"
             - name: TEMPORAL_PORT

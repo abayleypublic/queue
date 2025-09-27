@@ -1,3 +1,4 @@
+import { toast } from 'sonner'
 import useSWR from 'swr'
 
 import { GetChat, SendMessage } from '@/features/chat/api'
@@ -14,7 +15,25 @@ const useChat = ({ id }: useChatArgs) => {
         const messages = [...(data || []), { actor: 'user' as Role, text: message }]
 
         mutate(async () => {
-            await SendMessage({ id, message })
+            try {
+                const response = await SendMessage({ id, message })
+
+                const resetSeconds = response?.headers.get("X-Ratelimit-Reset")
+                switch (response?.status) {
+                    case 429:
+                        if (resetSeconds) {
+                            toast.error(`You are being rate limited. Please try again in ${resetSeconds} seconds.`)
+                            break
+                        }
+
+                        toast.error(`You are being rate limited. Please try again later.`)
+                        break
+                }
+            } catch (error) {
+                console.error("failed to send message", error)
+                toast.error("Failed to send message")
+            }
+
             return messages
         }, {
             optimisticData: messages,

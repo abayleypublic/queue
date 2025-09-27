@@ -27,6 +27,8 @@ spec:
     metadata:
       labels:
         app: backend
+      annotations:
+        ebpf.instrument: "true"
     spec:
       containers:
         - name: backend
@@ -35,9 +37,11 @@ spec:
             - containerPort: 80
           env:
             - name: ADDRESS
-              value: "[::1]:80"
+              value: "0.0.0.0:80"
             - name: REDIS_URL
               value: "redis://valkey:6379"
+            - name: RUST_LOG
+              value: "info"
       imagePullSecrets:
         - name: gcp-pull-secret
 ---
@@ -70,6 +74,8 @@ spec:
     metadata:
       labels:
         app: valkey
+      annotations:
+        ebpf.instrument: "true"
     spec:
       containers:
         - name: valkey

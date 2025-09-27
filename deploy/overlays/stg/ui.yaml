@@ -37,6 +37,8 @@ spec:
     metadata:
       labels:
         app: ui
+      annotations:
+        ebpf.instrument: "true"
     spec:
       containers:
         - name: ui

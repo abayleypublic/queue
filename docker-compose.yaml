@@ -7,7 +7,7 @@ services:
     ports:
       - "8001:8001"
     environment:
-      - RUST_LOG=info
+      - RUST_LOG=debug
       - REDIS_URL=redis://valkey:6379
     depends_on:
       - valkey

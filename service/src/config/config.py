@@ -12,6 +12,7 @@ from temporalio.common import RetryPolicy
 from temporalio.activity import _Definition
 from temporalio.contrib.pydantic import pydantic_data_converter
 from temporalio.contrib.openai_agents import OpenAIAgentsPlugin, ModelActivityParameters
+from temporalio.contrib.opentelemetry import TracingInterceptor
 from mcp import Tool as MCPTool
 
 # as per https://json-schema.org/understanding-json-schema/reference/type
@@ -224,5 +225,6 @@ class Config(BaseModel):
                     api_key=self.openai.api_key,
                     base_url=self.openai.api_base
                 )
-            )]
+            )],
+            interceptors=[TracingInterceptor()],
         ) 
