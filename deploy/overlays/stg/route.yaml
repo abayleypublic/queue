@@ -19,7 +19,7 @@ spec:
           urlRewrite:
             path:
               type: ReplacePrefixMatch
-              replacePrefixMatch: ''
+              replacePrefixMatch: '/messages/'
       backendRefs:
         - name: service
           port: 80
