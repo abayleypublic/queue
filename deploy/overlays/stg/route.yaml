@@ -35,9 +35,9 @@ spec:
     global:
       rules:
       - clientSelectors:
-        - sourceCIDR:
-            value: 0.0.0.0/0
-            type: Distinct
+        - headers:
+          - type: Distinct
+            name: X-Auth-Request-User
         shared: false
         limit:
           requests: 1
