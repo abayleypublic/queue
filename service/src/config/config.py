@@ -15,6 +15,8 @@ from temporalio.contrib.openai_agents import OpenAIAgentsPlugin, ModelActivityPa
 from temporalio.contrib.opentelemetry import TracingInterceptor
 from mcp import Tool as MCPTool
 
+from src.context import request
+
 # as per https://json-schema.org/understanding-json-schema/reference/type
 json_schema_types_to_python: dict[str, type] = {
     "string": str,
@@ -45,15 +47,6 @@ class MCPConfig(BaseSettings):
 
     address: str = "http://localhost:8002/mcp"
     _tools: List[MCPTool] = []
-
-    @property
-    def streamable_http(self) -> MCPServerStreamableHttp:
-        return MCPServerStreamableHttp(
-            params=MCPServerStreamableHttpParams(
-                url=self.address
-            ),
-            use_structured_content=True
-        )
 
     def _mcp_tool_to_activity(self, tool: MCPTool):
         """
@@ -96,7 +89,14 @@ class MCPConfig(BaseSettings):
             """
             input = kwargs if len(args) == 0 else {prop.name: arg for prop, arg in zip(input_properties, args)}
 
-            async with self.streamable_http as conn:
+            async with MCPServerStreamableHttp(
+                params=MCPServerStreamableHttpParams(
+                    url=self.address,
+                    headers=request.get().headers
+                ),
+                use_structured_content=True
+            ) as conn:
+                conn.params
                 return await conn.call_tool(tool.name, input)
 
         setattr(run, "__name__", tool.name)
@@ -129,7 +129,12 @@ class MCPConfig(BaseSettings):
         init_tools caches the tools available on the MCP server. It must be called
         prior to using the `activities` property.
         """
-        async with self.streamable_http as conn:
+        async with MCPServerStreamableHttp(
+            params=MCPServerStreamableHttpParams(
+                url=self.address
+            ),
+            use_structured_content=True
+        ) as conn:
             self._tools = await conn.list_tools()
 
     @property

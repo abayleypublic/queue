@@ -1,5 +1,6 @@
 from typing import Annotated, List
 
+# from mcp.server.lowlevel.server import request_ctx
 from fastmcp import FastMCP
 from fastmcp.server.dependencies import get_http_headers
 from grpc import insecure_channel, RpcError
@@ -10,7 +11,6 @@ from .gen.queue_service_pb2 import GetQueueRequest, GetQueueResponse, SetQueueRe
 from .gen.queue_service_pb2_grpc import QueueStub
 
 mcp = FastMCP("My MCP Server")
-
 
 # This translates to a string but only because I would prefer to spend the effort on
 # other things for now
