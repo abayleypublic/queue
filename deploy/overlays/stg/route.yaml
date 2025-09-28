@@ -37,7 +37,7 @@ spec:
       - clientSelectors:
         - headers:
           - type: Distinct
-            name: X-Auth-Request-User
+            name: x-auth-request-user
         shared: false
         limit:
           requests: 1
