@@ -1,4 +1,4 @@
-FROM python:3.10.18-alpine3.22
+FROM python:3.14.0-alpine3.22
 
 COPY --from=ghcr.io/astral-sh/uv:0.8.14 /uv /uvx /bin/
 
