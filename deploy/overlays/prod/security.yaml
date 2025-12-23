@@ -1,0 +1,60 @@
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: SecurityPolicy
+metadata:
+  name: queue-protected
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: prod-queue-protected
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: prod-queue-small-rate-limit
+  cors:
+    allowOrigins:
+      - "https://queue.austinbayley.co.uk"
+  extAuth:
+    headersToExtAuth:
+      - Cookie
+      - Authorization
+      - Host
+      - X-Forwarded-Host
+      - X-Forwarded-Proto
+      - X-Forwarded-Uri
+      - Origin
+    http:
+      backendRefs:
+        - name: oauth2-proxy
+          namespace: prod-auth
+          port: 4180
+      headersToBackend:
+        - X-Auth-Request-User
+        - X-Auth-Request-Email
+        - X-Auth-Request-Groups
+        - Authorization
+---
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: SecurityPolicy
+metadata:
+  name: cors
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: prod-queue-oauth
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: prod-queue-small-rate-limit
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: prod-queue-protected
+  cors:
+    allowCredentials: true
+    allowHeaders:
+      - content-type
+    allowMethods:
+      - GET
+      - POST
+      - OPTIONS
+    allowOrigins:
+      - "https://queue.austinbayley.co.uk"
