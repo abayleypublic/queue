@@ -91,23 +91,3 @@ spec:
       backendRefs:
         - name: service
           port: 80
----
-apiVersion: gateway.networking.k8s.io/v1
-kind: HTTPRoute
-metadata:
-  name: prod-queue-oauth
-spec:
-  parentRefs:
-    - name: default-gateway
-      namespace: envoy-gateway-system
-  hostnames:
-    - "queue.austinbayley.co.uk"
-  rules:
-    - matches:
-        - path:
-            type: PathPrefix
-            value: /oauth2
-      backendRefs:
-        - name: oauth2-proxy
-          namespace: prod-auth
-          port: 4180
