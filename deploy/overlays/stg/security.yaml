@@ -11,8 +11,16 @@ spec:
       kind: HTTPRoute
       name: stg-queue-small-rate-limit
   cors:
+    allowCredentials: true
+    allowHeaders:
+      - content-type
+    allowMethods:
+      - GET
+      - POST
+      - OPTIONS
     allowOrigins:
       - "https://queue.stg.austinbayley.co.uk"
+      - "http://localhost:5173"
   extAuth:
     headersToExtAuth:
       - Cookie
@@ -36,18 +44,12 @@ spec:
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: SecurityPolicy
 metadata:
-  name: cors
+  name: queue-oauth
 spec:
   targetRefs:
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
       name: stg-queue-oauth
-    - group: gateway.networking.k8s.io
-      kind: HTTPRoute
-      name: stg-queue-small-rate-limit
-    - group: gateway.networking.k8s.io
-      kind: HTTPRoute
-      name: stg-queue-protected
   cors:
     allowCredentials: true
     allowHeaders:
