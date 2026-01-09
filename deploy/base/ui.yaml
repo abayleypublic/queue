@@ -10,18 +10,6 @@ spec:
           targetPort: 80
           protocol: TCP
 ---
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: ui-config
-data:
-  config.json: |
-    {
-      "api_url": "https://queue.stg.austinbayley.co.uk",
-      "queue": "default",
-      "user": "austin"
-    }
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
