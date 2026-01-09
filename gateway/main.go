@@ -27,6 +27,8 @@ func CustomMatcher(key string) (string, bool) {
 	switch strings.ToLower(key) {
 	case "traceparent", "tracestate":
 		return key, true
+	case "x-auth-request-user", "x-auth-request-email", "x-auth-request-groups":
+		return key, true
 	default:
 		return runtime.DefaultHeaderMatcher(key)
 	}

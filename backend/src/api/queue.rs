@@ -10,6 +10,8 @@ use tonic::{Request, Response, Status};
 use tracing::Instrument;
 use tracing::{debug, info_span};
 
+use crate::api::middleware::user_from_request;
+
 #[derive(Debug, Clone)]
 pub struct QueueService {
     // Plain redis multiplexed connection (cheap to clone & send cmds on).
@@ -34,6 +36,11 @@ impl Queue for QueueService {
     ) -> Result<Response<GetQueueResponse>, Status> {
         debug!("received get_queue request: {:?}", request);
 
+        let user = user_from_request(&request);
+        if user.is_none() || user.unwrap().email.is_empty() {
+            return Err(Status::unauthenticated("user not authenticated"));
+        }
+
         let key = queue_key(request.into_inner().id);
 
         let mut conn = self.redis.clone();
@@ -57,6 +64,11 @@ impl Queue for QueueService {
         request: Request<SetQueueRequest>,
     ) -> Result<Response<SetQueueResponse>, Status> {
         debug!("received set_queue request: {:?}", request);
+
+        let user = user_from_request(&request);
+        if user.is_none() || user.unwrap().email.is_empty() {
+            return Err(Status::unauthenticated("user not authenticated"));
+        }
 
         let inner = request.into_inner();
         let key = queue_key(inner.id);
