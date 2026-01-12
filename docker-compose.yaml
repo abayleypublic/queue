@@ -29,6 +29,7 @@ services:
       - "8002:8002"
     environment:
       - BACKEND_HOST=backend
+      - SERVER_HOST=0.0.0.0
     depends_on:
       - backend
 
@@ -39,8 +40,12 @@ services:
       - "8003:8003"
     environment:
       - MCP_ADDRESS=http://mcp:8002/mcp
+      - TEMPORAL_HOST=host.docker.internal
+      - TEMPORAL_PORT=7233
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
-      - backend
+      - mcp
 
   ui:
     build:
