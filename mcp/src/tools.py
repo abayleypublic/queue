@@ -1,6 +1,7 @@
 from typing import Annotated, List
 
 from fastmcp import FastMCP
+from fastmcp.server.dependencies import get_http_headers
 from grpc import insecure_channel, RpcError
 from loguru import logger
 
@@ -25,7 +26,10 @@ def get_queue(
         stub = QueueStub(channel)
 
         try:
-            response: GetQueueResponse = stub.GetQueue(GetQueueRequest(id=queue_id))
+            response: GetQueueResponse = stub.GetQueue(
+                GetQueueRequest(id=queue_id), 
+                metadata=tuple((key, value) for key, value in get_http_headers().items())
+            )
         except RpcError as e:
             logger.error("failed to get queue: " + str(e))
             raise e
@@ -41,23 +45,34 @@ def add_to_queue(
     add_to_queue adds an entity to the specified queue
     """
 
+    headers = tuple((key, value) for key, value in get_http_headers().items())
+
     with insecure_channel(cfg.backend.url) as channel:
         stub = QueueStub(channel)
 
+        print("calling get queue")
         try:
-            response: GetQueueResponse = stub.GetQueue(GetQueueRequest(id=queue_id))
+            response, _ = stub.GetQueue.with_call(
+                GetQueueRequest(id=queue_id),
+                metadata=headers
+            )
         except RpcError as e:
             logger.error("failed to get queue: " + str(e))
             raise e
 
+        print(response)
+
         try:
-            _ = stub.SetQueue(SetQueueRequest(
-                id=queue_id,
-                entities=[*response.entities, Entity(
-                    id=entity_id,
-                    name=entity_name
-                )]
-            ))
+            _, _ = stub.SetQueue.with_call(
+                SetQueueRequest(
+                    id=queue_id,
+                    entities=[*response.entities, Entity(
+                        id=entity_id,
+                        name=entity_name
+                    )]
+                ),
+                metadata=headers
+            )
         except RpcError as e:
             logger.error("failed to set queue: " + str(e))
             raise e
@@ -73,12 +88,17 @@ def remove_from_queue(
     remove_from_queue removes an entity from the specified queue
     """
 
+    headers = tuple((key, value) for key, value in get_http_headers().items())
+
     with insecure_channel(cfg.backend.url) as channel:
         stub = QueueStub(channel)
 
         queue: List[Entity] = []
         try:
-            response: GetQueueResponse = stub.GetQueue(GetQueueRequest(id=queue_id))
+            response: GetQueueResponse = stub.GetQueue(
+                GetQueueRequest(id=queue_id),
+                metadata=headers
+            )
             for entity in response.entities:
                 if entity.id != entity_id:
                     queue.append(entity)
@@ -87,10 +107,13 @@ def remove_from_queue(
             raise e
 
         try:
-            _ = stub.SetQueue(SetQueueRequest(
-                id=queue_id,
-                entities=queue
-            ))
+            _ = stub.SetQueue(
+                SetQueueRequest(
+                    id=queue_id,
+                    entities=queue
+                ),
+                metadata=headers
+            )
         except RpcError as e:
             logger.error("failed to set queue: " + str(e))
             raise e
