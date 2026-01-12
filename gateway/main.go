@@ -44,7 +44,7 @@ func CustomMatcher(key string) (string, bool) {
 
 func main() {
 	var cfg Config
-	if err := envconfig.Process("gateway_", &cfg); err != nil {
+	if err := envconfig.Process("", &cfg); err != nil {
 		log.Fatal().Err(err).Msg("failed to process config")
 	}
 
