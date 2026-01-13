@@ -110,6 +110,9 @@ class Conversation:
                     {
                         "role": "user",
                         "content": f"""
+                            User name: {auth_context.auth_user}
+                            User email: {auth_context.auth_email}
+                            User groups: {auth_context.auth_groups}
                             {self._message.text}
                         """
                     }

@@ -19,10 +19,11 @@ def get_queue(
     queue_id: Annotated[str, "The ID of the queue"]
 ) -> str:
     """
-    get_queue retrieves the specified queue. The response is a comma-separated list of entity IDs.
+    get_queue retrieves the specified queue. The response includes entity IDs and names.
     """
     
     headers = get_http_headers()
+
     with insecure_channel(cfg.backend.url) as channel:
         stub = QueueStub(channel)
 
@@ -35,16 +36,26 @@ def get_queue(
             logger.error("failed to get queue: " + str(e))
             raise e
 
-    return ", ".join([str(entity.id) for entity in response.entities]) or "No entities in queue"
+    if not response.entities:
+        return "No entities in queue"
+    
+    # Return formatted list showing both ID and name
+    entities_list = [f"{entity.name} (ID: {entity.id})" for entity in response.entities]
+    return "Queue contents:\n" + "\n".join(f"  - {item}" for item in entities_list)
 
 @mcp.tool
 def add_to_queue(
     queue_id: Annotated[str, "The ID of the queue"],
-    entity_id: Annotated[str, "The ID of the entity to add to the queue"],
+    entity_id: Annotated[str, "The ID of the entity to add to the queue. Must be a valid, non-empty identifier."],
     entity_name: Annotated[str, "The name of the entity to add to the queue"]) -> str:
     """
-    add_to_queue adds an entity to the specified queue
+    add_to_queue adds an entity to the specified queue. A valid entity_id is required.
     """
+
+    if not entity_id or entity_id.strip() == "":
+        error_msg = "entity_id is required and cannot be empty. Please provide a valid identifier for the entity."
+        logger.error(error_msg)
+        raise ValueError(error_msg)
 
     headers_dict = get_http_headers()
     headers = tuple((key, value) for key, value in headers_dict.items())
@@ -76,7 +87,7 @@ def add_to_queue(
             logger.error("failed to set queue: " + str(e))
             raise e
 
-    return f"{entity_id} was successfully added to the queue"
+    return f"Entity '{entity_name}' (ID: {entity_id}) was successfully added to the queue"
 
 @mcp.tool
 def remove_from_queue(
