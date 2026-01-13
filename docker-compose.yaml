@@ -43,6 +43,7 @@ services:
       - MCP_ADDRESS=http://mcp:8002/mcp
       - TEMPORAL_HOST=host.docker.internal
       - TEMPORAL_PORT=7233
+      - OPENAI_API_BASE=http://host.docker.internal:11434/v1
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:

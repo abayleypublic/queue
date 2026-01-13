@@ -2,9 +2,11 @@ from datetime import timedelta
 from typing import Coroutine, Any, List, Type, Optional
 from inspect import signature, Parameter
 
+from loguru import logger
 from openai import AsyncOpenAI
 from agents import OpenAIProvider
 from agents.mcp import  MCPServerStreamableHttp, MCPServerStreamableHttpParams
+from agents.tool_context import ToolContext
 from pydantic import BaseModel
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from temporalio.client import Client, TLSConfig
@@ -14,6 +16,8 @@ from temporalio.contrib.pydantic import pydantic_data_converter
 from temporalio.contrib.openai_agents import OpenAIAgentsPlugin, ModelActivityParameters
 from temporalio.contrib.opentelemetry import TracingInterceptor
 from mcp import Tool as MCPTool
+
+from src import context
 
 # as per https://json-schema.org/understanding-json-schema/reference/type
 json_schema_types_to_python: dict[str, type] = {
@@ -46,14 +50,19 @@ class MCPConfig(BaseSettings):
     address: str = "http://localhost:8002/mcp"
     _tools: List[MCPTool] = []
 
-    @property
-    def streamable_http(self) -> MCPServerStreamableHttp:
-        return MCPServerStreamableHttp(
-            params=MCPServerStreamableHttpParams(
-                url=self.address
-            ),
-            use_structured_content=True
-        )
+    def _get_context_headers(self) -> dict[str, str]:
+        """
+        Get all context headers as a dictionary from contextvars.
+        Returns only headers that have been set (non-None values).
+        """
+        headers = {}
+        if user := context.get_auth_user():
+            headers['X-Auth-Request-User'] = user
+        if email := context.get_auth_email():
+            headers['X-Auth-Request-Email'] = email
+        if groups := context.get_auth_groups():
+            headers['X-Auth-Request-Groups'] = groups
+        return headers
 
     def _mcp_tool_to_activity(self, tool: MCPTool):
         """
@@ -90,13 +99,62 @@ class MCPConfig(BaseSettings):
             type=t if required else Optional[t]
         )
 
-        async def run(*args, **kwargs):
+        async def run(tool_context, *args, **kwargs):
             """
             run simply calls the MCP tool with the provided arguments.
+            Receives tool_context from Temporal (may be dict or ToolContext object).
+            
+            Args:
+                tool_context: Context passed by Temporal - may be dict with tool_context key
+                *args, **kwargs: Tool-specific arguments
             """
             input = kwargs if len(args) == 0 else {prop.name: arg for prop, arg in zip(input_properties, args)}
 
-            async with self.streamable_http as conn:
+            # Extract auth headers from the context
+            # The Temporal plugin passes ToolContext as a dict with 'context', 'usage', 'tool_name', 'tool_call_id' keys
+            headers = {}
+            auth_ctx = None
+            
+            if isinstance(tool_context, dict) and "context" in tool_context:
+                # Temporal serializes ToolContext as a dict
+                auth_ctx = tool_context["context"]
+            elif hasattr(tool_context, 'context'):
+                # Direct ToolContext object (if not serialized)
+                auth_ctx = tool_context.context
+            
+            # Extract auth headers from AuthContext
+            # auth_ctx could be a dict or an object with attributes
+            if auth_ctx:
+                if isinstance(auth_ctx, dict):
+                    # AuthContext serialized as dict
+                    if auth_ctx.get('auth_user'):
+                        headers['X-Auth-Request-User'] = auth_ctx['auth_user']
+                    if auth_ctx.get('auth_email'):
+                        headers['X-Auth-Request-Email'] = auth_ctx['auth_email']
+                    if auth_ctx.get('auth_groups'):
+                        headers['X-Auth-Request-Groups'] = auth_ctx['auth_groups']
+                else:
+                    # AuthContext as object with attributes
+                    if hasattr(auth_ctx, 'auth_user') and auth_ctx.auth_user:
+                        headers['X-Auth-Request-User'] = auth_ctx.auth_user
+                    if hasattr(auth_ctx, 'auth_email') and auth_ctx.auth_email:
+                        headers['X-Auth-Request-Email'] = auth_ctx.auth_email
+                    if hasattr(auth_ctx, 'auth_groups') and auth_ctx.auth_groups:
+                        headers['X-Auth-Request-Groups'] = auth_ctx.auth_groups
+            
+            if headers:
+                logger.info(f"Activity {tool.name} executing with auth headers from context: {headers}")
+            else:
+                logger.warning(f"Activity {tool.name} executing WITHOUT headers - no auth context provided. tool_context type: {type(tool_context)}, content: {tool_context}")
+            
+            # Create MCP client with auth headers from context
+            async with MCPServerStreamableHttp(
+                params=MCPServerStreamableHttpParams(
+                    url=self.address,
+                    headers=headers
+                ),
+                use_structured_content=True
+            ) as conn:
                 return await conn.call_tool(tool.name, input)
 
         setattr(run, "__name__", tool.name)
@@ -104,7 +162,8 @@ class MCPConfig(BaseSettings):
         sig = signature(run)
         sig = sig.replace(
             parameters=[
-                Parameter(name=prop.name, kind=Parameter.POSITIONAL_OR_KEYWORD, annotation=prop.type) for prop in input_properties
+                Parameter(name="tool_context", kind=Parameter.POSITIONAL_OR_KEYWORD, annotation=ToolContext),
+                *[Parameter(name=prop.name, kind=Parameter.POSITIONAL_OR_KEYWORD, annotation=prop.type) for prop in input_properties]
             ],
             return_annotation=result.type
         )
@@ -129,7 +188,10 @@ class MCPConfig(BaseSettings):
         init_tools caches the tools available on the MCP server. It must be called
         prior to using the `activities` property.
         """
-        async with self.streamable_http as conn:
+        async with MCPServerStreamableHttp(
+            params=MCPServerStreamableHttpParams(url=self.address),
+            use_structured_content=True
+        ) as conn:
             self._tools = await conn.list_tools()
 
     @property

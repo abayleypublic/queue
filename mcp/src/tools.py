@@ -21,14 +21,15 @@ def get_queue(
     """
     get_queue retrieves the specified queue. The response is a comma-separated list of entity IDs.
     """
-
+    
+    headers = get_http_headers()
     with insecure_channel(cfg.backend.url) as channel:
         stub = QueueStub(channel)
 
         try:
             response: GetQueueResponse = stub.GetQueue(
                 GetQueueRequest(id=queue_id), 
-                metadata=tuple((key, value) for key, value in get_http_headers().items())
+                metadata=tuple((key, value) for key, value in headers.items())
             )
         except RpcError as e:
             logger.error("failed to get queue: " + str(e))
@@ -45,12 +46,12 @@ def add_to_queue(
     add_to_queue adds an entity to the specified queue
     """
 
-    headers = tuple((key, value) for key, value in get_http_headers().items())
+    headers_dict = get_http_headers()
+    headers = tuple((key, value) for key, value in headers_dict.items())
 
     with insecure_channel(cfg.backend.url) as channel:
         stub = QueueStub(channel)
 
-        print("calling get queue")
         try:
             response, _ = stub.GetQueue.with_call(
                 GetQueueRequest(id=queue_id),
@@ -59,8 +60,6 @@ def add_to_queue(
         except RpcError as e:
             logger.error("failed to get queue: " + str(e))
             raise e
-
-        print(response)
 
         try:
             _, _ = stub.SetQueue.with_call(
