@@ -3,7 +3,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from uvicorn import Config, Server
 from loguru import logger
 
-from .routes import messages
+from .routes import messages, user
 from .config import cfg
 from . import context
 
@@ -28,6 +28,7 @@ class HeaderPropagationMiddleware(BaseHTTPMiddleware):
 app = FastAPI()
 app.add_middleware(HeaderPropagationMiddleware)
 app.include_router(messages.router)
+app.include_router(user.router)
 
 async def run_api():
     logger.info("starting API server...")

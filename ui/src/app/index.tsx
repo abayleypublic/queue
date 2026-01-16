@@ -11,11 +11,13 @@ import ChatPanel from '@/features/chat/components/chat-panel'
 import useChat from '@/features/chat/hooks/use-chat'
 import QueueCard from '@/features/queue/components/queue-card'
 import useQueue from '@/features/queue/hooks/use-queue'
+import useUser from '@/features/user/hooks/use-user'
 
 const App = () => {
   const [input, setInput] = useState("")
 
-  const { data: chat, error: chatError, send } = useChat({ id: Config.user })
+  const { user, isLoading: userLoading, error: userError } = useUser()
+  const { data: chat, error: chatError, send } = useChat({ id: user?.email || '' })
   const { data: queue, isLoading: queueLoading, error: queueError, refresh: refreshQueue } = useQueue({ id: Config.queue })
 
   const [isOpen, setOpen] = useState(false)
@@ -40,11 +42,35 @@ const App = () => {
   }, [chat])
 
 
-  if (queueError || chatError) {
+  if (userLoading) {
+    return (
+      <ThemeProvider>
+        <Layout>
+          <div className="flex justify-center">
+            <Spinner variant="ring" />
+          </div>
+        </Layout>
+      </ThemeProvider>
+    )
+  }
+
+  if (queueError || chatError || userError) {
     return (
       <div className="flex justify-center">
         <p className="text-sm text-red-500">Oopsie</p>
       </div>
+    )
+  }
+
+  if (!user?.email) {
+    return (
+      <ThemeProvider>
+        <Layout>
+          <div className="flex justify-center">
+            <p className="text-sm text-red-500">Unable to identify user. Please ensure you are authenticated.</p>
+          </div>
+        </Layout>
+      </ThemeProvider>
     )
   }
 
