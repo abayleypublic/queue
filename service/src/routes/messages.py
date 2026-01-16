@@ -13,6 +13,9 @@ from pydantic import BaseModel
 from src.schema import Message, ConversationResultSchema
 from src.config import cfg
 from src.workflows.conversation import Conversation, ConversationArgs
+from src import context
+
+ALLOWED_QUEUES = ["default", "foo", "bar"]
 
 router = APIRouter(prefix="/messages")
 
@@ -70,6 +73,16 @@ async def get_messages(id: str) -> List[MessageResponse]:
 
 @router.post("/{id}", response_model=ConversationResultSchema)
 async def create_message(id: str, message: Message) -> ConversationResultSchema:
+    message.auth_user = context.get_auth_user()
+    message.auth_email = context.get_auth_email()
+    message.auth_groups = context.get_auth_groups()
+    
+    if message.queue not in ALLOWED_QUEUES:
+        raise HTTPException(
+            status_code=HTTPStatus.BAD_REQUEST,
+            detail=f"Invalid queue '{message.queue}'. Must be one of: {', '.join(ALLOWED_QUEUES)}"
+        )
+    
     client = await cfg.temporal_client
 
     handle: WorkflowHandle[Conversation, str] | None = None

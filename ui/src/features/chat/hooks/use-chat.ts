@@ -11,12 +11,12 @@ interface useChatArgs {
 const useChat = ({ id }: useChatArgs) => {
     const { data, mutate, ...rest } = useSWR(({ id }), GetChat)
 
-    const send = async (message: string) => {
+    const send = async (message: string, queue: string) => {
         const messages = [...(data || []), { actor: 'user' as Role, text: message }]
 
         mutate(async () => {
             try {
-                const response = await SendMessage({ id, message })
+                const response = await SendMessage({ id, message, queue })
 
                 const resetSeconds = response?.headers.get("X-Ratelimit-Reset")
                 switch (response?.status) {

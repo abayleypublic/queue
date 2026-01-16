@@ -2,9 +2,11 @@ from datetime import timedelta
 from typing import Coroutine, Any, List, Type, Optional
 from inspect import signature, Parameter
 
+from loguru import logger
 from openai import AsyncOpenAI
 from agents import OpenAIProvider
 from agents.mcp import  MCPServerStreamableHttp, MCPServerStreamableHttpParams
+from agents.tool_context import ToolContext
 from pydantic import BaseModel
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from temporalio.client import Client, TLSConfig
@@ -14,6 +16,8 @@ from temporalio.contrib.pydantic import pydantic_data_converter
 from temporalio.contrib.openai_agents import OpenAIAgentsPlugin, ModelActivityParameters
 from temporalio.contrib.opentelemetry import TracingInterceptor
 from mcp import Tool as MCPTool
+
+from src import context
 
 # as per https://json-schema.org/understanding-json-schema/reference/type
 json_schema_types_to_python: dict[str, type] = {
@@ -46,14 +50,23 @@ class MCPConfig(BaseSettings):
     address: str = "http://localhost:8002/mcp"
     _tools: List[MCPTool] = []
 
-    @property
-    def streamable_http(self) -> MCPServerStreamableHttp:
-        return MCPServerStreamableHttp(
-            params=MCPServerStreamableHttpParams(
-                url=self.address
-            ),
-            use_structured_content=True
-        )
+    def _extract_auth_headers(self, auth_ctx: Any) -> dict[str, str]:
+        """Extract auth headers from AuthContext (dict or object)."""
+        headers = {}
+        if not auth_ctx:
+            return headers
+        
+        # Handle both dict and object attribute access
+        get_attr = auth_ctx.get if isinstance(auth_ctx, dict) else lambda k: getattr(auth_ctx, k, None)
+        
+        if user := get_attr('auth_user'):
+            headers['X-Auth-Request-User'] = user
+        if email := get_attr('auth_email'):
+            headers['X-Auth-Request-Email'] = email
+        if groups := get_attr('auth_groups'):
+            headers['X-Auth-Request-Groups'] = groups
+        
+        return headers
 
     def _mcp_tool_to_activity(self, tool: MCPTool):
         """
@@ -90,13 +103,24 @@ class MCPConfig(BaseSettings):
             type=t if required else Optional[t]
         )
 
-        async def run(*args, **kwargs):
-            """
-            run simply calls the MCP tool with the provided arguments.
-            """
+        async def run(tool_context, *args, **kwargs):
+            """Call MCP tool with the provided arguments and auth context."""
             input = kwargs if len(args) == 0 else {prop.name: arg for prop, arg in zip(input_properties, args)}
 
-            async with self.streamable_http as conn:
+            # Extract auth context from tool_context (dict or object)
+            auth_ctx = tool_context.get("context") if isinstance(tool_context, dict) else getattr(tool_context, 'context', None)
+            headers = self._extract_auth_headers(auth_ctx)
+            
+            if not headers:
+                logger.warning(f"activity {tool.name} executing without auth headers")
+            
+            async with MCPServerStreamableHttp(
+                params=MCPServerStreamableHttpParams(
+                    url=self.address,
+                    headers=headers
+                ),
+                use_structured_content=True
+            ) as conn:
                 return await conn.call_tool(tool.name, input)
 
         setattr(run, "__name__", tool.name)
@@ -104,7 +128,8 @@ class MCPConfig(BaseSettings):
         sig = signature(run)
         sig = sig.replace(
             parameters=[
-                Parameter(name=prop.name, kind=Parameter.POSITIONAL_OR_KEYWORD, annotation=prop.type) for prop in input_properties
+                Parameter(name="tool_context", kind=Parameter.POSITIONAL_OR_KEYWORD, annotation=ToolContext),
+                *[Parameter(name=prop.name, kind=Parameter.POSITIONAL_OR_KEYWORD, annotation=prop.type) for prop in input_properties]
             ],
             return_annotation=result.type
         )
@@ -129,7 +154,10 @@ class MCPConfig(BaseSettings):
         init_tools caches the tools available on the MCP server. It must be called
         prior to using the `activities` property.
         """
-        async with self.streamable_http as conn:
+        async with MCPServerStreamableHttp(
+            params=MCPServerStreamableHttpParams(url=self.address),
+            use_structured_content=True
+        ) as conn:
             self._tools = await conn.list_tools()
 
     @property

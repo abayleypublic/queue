@@ -16,16 +16,18 @@ export const GetChat = async ({ id }: GetChatArgs): Promise<Array<Message>> => {
 interface SendMessageArgs {
     id: string
     message: string
+    queue: string
 }
 
-export const SendMessage = async ({ id, message }: SendMessageArgs): Promise<Response> => {
+export const SendMessage = async ({ id, message, queue }: SendMessageArgs): Promise<Response> => {
     return await fetch(`${Config.apiURL}/service/messages/${id}`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            text: message
+            text: message,
+            queue: queue
         })
     })
 }

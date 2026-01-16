@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import BaseModel, Field
 
 from .openai import OpenAISchema
@@ -14,3 +16,8 @@ class Message(BaseModel):
     Message is a message sent by the user to the assistant.
     """
     text: str
+    queue: str = "default"
+
+    auth_user: Optional[str] = None
+    auth_email: Optional[str] = None
+    auth_groups: Optional[str] = None

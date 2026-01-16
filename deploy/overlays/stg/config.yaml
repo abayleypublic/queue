@@ -6,6 +6,5 @@ data:
   config.json: |
     {
       "api_url": "https://queue.stg.austinbayley.co.uk",
-      "queue": "default",
-      "user": "unknown"
+      "queue": "default"
     }

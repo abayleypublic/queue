@@ -19,16 +19,26 @@ import (
 )
 
 type Config struct {
-	Backend string `envconfig:"BACKEND" default:"[::1]:8001"`
-	Port    int    `envconfig:"PORT" default:"8004"`
+	Backend string `envconfig:"backend" default:"localhost:8001"`
+	Port    int    `envconfig:"port" default:"8004"`
 }
 
 func CustomMatcher(key string) (string, bool) {
-	switch strings.ToLower(key) {
-	case "traceparent", "tracestate":
+	switch key {
+	case "X-Auth-Request-User":
+		return key, true
+	case "X-Auth-Request-Email":
+		return key, true
+	case "X-Auth-Request-Groups":
 		return key, true
 	default:
-		return runtime.DefaultHeaderMatcher(key)
+		// Also handle tracing headers
+		switch strings.ToLower(key) {
+		case "traceparent", "tracestate":
+			return key, true
+		default:
+			return runtime.DefaultHeaderMatcher(key)
+		}
 	}
 }
 
@@ -47,12 +57,10 @@ func main() {
 	mux := runtime.NewServeMux(
 		runtime.WithIncomingHeaderMatcher(CustomMatcher),
 	)
-
 	opts := []grpc.DialOption{
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithStatsHandler(otelgrpc.NewClientHandler()),
 	}
-
 	if err := gw.RegisterQueueHandlerFromEndpoint(ctx, mux, cfg.Backend, opts); err != nil {
 		log.Fatal().Err(err).Msg("failed to register gateway handler")
 	}

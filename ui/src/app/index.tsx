@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react'
 import Layout from '@/app/layout'
 import ThemeProvider from '@/app/provider'
 import { Input } from '@/components/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Spinner } from '@/components/ui/shadcn-io/spinner'
 import Config from '@/config'
 import ChatGrid from '@/features/chat/components/chat-grid'
@@ -11,12 +12,15 @@ import ChatPanel from '@/features/chat/components/chat-panel'
 import useChat from '@/features/chat/hooks/use-chat'
 import QueueCard from '@/features/queue/components/queue-card'
 import useQueue from '@/features/queue/hooks/use-queue'
+import useUser from '@/features/user/hooks/use-user'
 
 const App = () => {
   const [input, setInput] = useState("")
+  const [selectedQueue, setSelectedQueue] = useState(Config.queue || "default")
 
-  const { data: chat, error: chatError, send } = useChat({ id: Config.user })
-  const { data: queue, isLoading: queueLoading, error: queueError, refresh: refreshQueue } = useQueue({ id: Config.queue })
+  const { user, isLoading: userLoading, error: userError } = useUser()
+  const { data: chat, error: chatError, send } = useChat({ id: user?.email || '' })
+  const { data: queue, isLoading: queueLoading, error: queueError, refresh: refreshQueue } = useQueue({ id: selectedQueue })
 
   const [isOpen, setOpen] = useState(false)
 
@@ -40,11 +44,35 @@ const App = () => {
   }, [chat])
 
 
-  if (queueError || chatError) {
+  if (userLoading) {
+    return (
+      <ThemeProvider>
+        <Layout>
+          <div className="flex justify-center">
+            <Spinner variant="ring" />
+          </div>
+        </Layout>
+      </ThemeProvider>
+    )
+  }
+
+  if (queueError || chatError || userError) {
     return (
       <div className="flex justify-center">
         <p className="text-sm text-red-500">Oopsie</p>
       </div>
+    )
+  }
+
+  if (!user?.email) {
+    return (
+      <ThemeProvider>
+        <Layout>
+          <div className="flex justify-center">
+            <p className="text-sm text-red-500">Unable to identify user. Please ensure you are authenticated.</p>
+          </div>
+        </Layout>
+      </ThemeProvider>
     )
   }
 
@@ -53,6 +81,18 @@ const App = () => {
       <Layout>
         <div className="h-full grid grid-rows-[1fr_auto] gap-y-4 mx-2 md:mx-0">
           <div className="flex flex-col gap-4 mt-2">
+            <div className="flex items-center gap-2">
+              <Select value={selectedQueue} onValueChange={setSelectedQueue}>
+                <SelectTrigger id="queue-select" className="w-[200px]">
+                  <SelectValue placeholder="Select a queue" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="default">default</SelectItem>
+                  <SelectItem value="foo">foo</SelectItem>
+                  <SelectItem value="bar">bar</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             {
               queueLoading && <div className="flex justify-center"> <Spinner variant="ring" /> </div>
             }
@@ -99,7 +139,7 @@ const App = () => {
               value={input}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && input.trim()) {
-                  send(input)
+                  send(input, selectedQueue)
                   setInput("")
                 }
               }}
