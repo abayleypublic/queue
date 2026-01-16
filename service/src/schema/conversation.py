@@ -17,7 +17,7 @@ class Message(BaseModel):
     """
     text: str
     queue: str = "default"
-    # Authentication headers passed from the API
+
     auth_user: Optional[str] = None
     auth_email: Optional[str] = None
     auth_groups: Optional[str] = None

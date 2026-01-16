@@ -50,18 +50,22 @@ class MCPConfig(BaseSettings):
     address: str = "http://localhost:8002/mcp"
     _tools: List[MCPTool] = []
 
-    def _get_context_headers(self) -> dict[str, str]:
-        """
-        Get all context headers as a dictionary from contextvars.
-        Returns only headers that have been set (non-None values).
-        """
+    def _extract_auth_headers(self, auth_ctx: Any) -> dict[str, str]:
+        """Extract auth headers from AuthContext (dict or object)."""
         headers = {}
-        if user := context.get_auth_user():
+        if not auth_ctx:
+            return headers
+        
+        # Handle both dict and object attribute access
+        get_attr = auth_ctx.get if isinstance(auth_ctx, dict) else lambda k: getattr(auth_ctx, k, None)
+        
+        if user := get_attr('auth_user'):
             headers['X-Auth-Request-User'] = user
-        if email := context.get_auth_email():
+        if email := get_attr('auth_email'):
             headers['X-Auth-Request-Email'] = email
-        if groups := context.get_auth_groups():
+        if groups := get_attr('auth_groups'):
             headers['X-Auth-Request-Groups'] = groups
+        
         return headers
 
     def _mcp_tool_to_activity(self, tool: MCPTool):
@@ -100,54 +104,16 @@ class MCPConfig(BaseSettings):
         )
 
         async def run(tool_context, *args, **kwargs):
-            """
-            run simply calls the MCP tool with the provided arguments.
-            Receives tool_context from Temporal (may be dict or ToolContext object).
-            
-            Args:
-                tool_context: Context passed by Temporal - may be dict with tool_context key
-                *args, **kwargs: Tool-specific arguments
-            """
+            """Call MCP tool with the provided arguments and auth context."""
             input = kwargs if len(args) == 0 else {prop.name: arg for prop, arg in zip(input_properties, args)}
 
-            # Extract auth headers from the context
-            # The Temporal plugin passes ToolContext as a dict with 'context', 'usage', 'tool_name', 'tool_call_id' keys
-            headers = {}
-            auth_ctx = None
+            # Extract auth context from tool_context (dict or object)
+            auth_ctx = tool_context.get("context") if isinstance(tool_context, dict) else getattr(tool_context, 'context', None)
+            headers = self._extract_auth_headers(auth_ctx)
             
-            if isinstance(tool_context, dict) and "context" in tool_context:
-                # Temporal serializes ToolContext as a dict
-                auth_ctx = tool_context["context"]
-            elif hasattr(tool_context, 'context'):
-                # Direct ToolContext object (if not serialized)
-                auth_ctx = tool_context.context
+            if not headers:
+                logger.warning(f"Activity {tool.name} executing without auth headers")
             
-            # Extract auth headers from AuthContext
-            # auth_ctx could be a dict or an object with attributes
-            if auth_ctx:
-                if isinstance(auth_ctx, dict):
-                    # AuthContext serialized as dict
-                    if auth_ctx.get('auth_user'):
-                        headers['X-Auth-Request-User'] = auth_ctx['auth_user']
-                    if auth_ctx.get('auth_email'):
-                        headers['X-Auth-Request-Email'] = auth_ctx['auth_email']
-                    if auth_ctx.get('auth_groups'):
-                        headers['X-Auth-Request-Groups'] = auth_ctx['auth_groups']
-                else:
-                    # AuthContext as object with attributes
-                    if hasattr(auth_ctx, 'auth_user') and auth_ctx.auth_user:
-                        headers['X-Auth-Request-User'] = auth_ctx.auth_user
-                    if hasattr(auth_ctx, 'auth_email') and auth_ctx.auth_email:
-                        headers['X-Auth-Request-Email'] = auth_ctx.auth_email
-                    if hasattr(auth_ctx, 'auth_groups') and auth_ctx.auth_groups:
-                        headers['X-Auth-Request-Groups'] = auth_ctx.auth_groups
-            
-            if headers:
-                logger.info(f"Activity {tool.name} executing with auth headers from context: {headers}")
-            else:
-                logger.warning(f"Activity {tool.name} executing WITHOUT headers - no auth context provided. tool_context type: {type(tool_context)}, content: {tool_context}")
-            
-            # Create MCP client with auth headers from context
             async with MCPServerStreamableHttp(
                 params=MCPServerStreamableHttpParams(
                     url=self.address,

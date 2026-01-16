@@ -84,7 +84,6 @@ class Conversation:
             if self._message is not None:
                 raise RuntimeError("message already set, cannot update.")
 
-            # Store auth headers from the message (deterministic - part of workflow input)
             self._auth_user = message.auth_user
             self._auth_email = message.auth_email
             self._auth_groups = message.auth_groups
@@ -124,7 +123,7 @@ class Conversation:
                         """
                     }
                 ],
-                context=auth_context,  # Pass auth context to Runner
+                context=auth_context,
                 run_config=RunConfig(
                     tracing_disabled=True
                 )
