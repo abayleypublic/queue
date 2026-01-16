@@ -5,5 +5,4 @@ resources:
   - backend.yaml
   - gateway.yaml
   - mcp.yaml
-  - service.yaml
   - ui.yaml
