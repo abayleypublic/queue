@@ -36,6 +36,12 @@ agent = Agent(
 
     If no queue is specified in the user's request, assume they are referring
     to the "default" queue.
+
+    If no ID is specified when adding or removing entities from a queue, the user email
+    should be used as the entity ID.
+
+    If no name is specified when adding an entity to a queue, the user name
+    should be used as the entity name.
     """,
 
     # The Temporal integration with OpenAI Agents does not currently support dynamic calls to MCP servers,
@@ -113,6 +119,7 @@ class Conversation:
                             User name: {auth_context.auth_user}
                             User email: {auth_context.auth_email}
                             User groups: {auth_context.auth_groups}
+                            Queue: {self._message.queue}
                             {self._message.text}
                         """
                     }

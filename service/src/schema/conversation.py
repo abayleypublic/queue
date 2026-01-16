@@ -16,6 +16,7 @@ class Message(BaseModel):
     Message is a message sent by the user to the assistant.
     """
     text: str
+    queue: str = "default"
     # Authentication headers passed from the API
     auth_user: Optional[str] = None
     auth_email: Optional[str] = None
