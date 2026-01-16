@@ -112,7 +112,7 @@ class MCPConfig(BaseSettings):
             headers = self._extract_auth_headers(auth_ctx)
             
             if not headers:
-                logger.warning(f"Activity {tool.name} executing without auth headers")
+                logger.warning(f"activity {tool.name} executing without auth headers")
             
             async with MCPServerStreamableHttp(
                 params=MCPServerStreamableHttpParams(
