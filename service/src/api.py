@@ -32,6 +32,7 @@ class HeaderPropagationMiddleware(BaseHTTPMiddleware):
     without explicit parameter passing.
     """
     async def dispatch(self, request: Request, call_next):
+        logger.info(f"All request headers: {dict(request.headers)}")
         context.auth_user.set(request.headers.get('x-auth-request-user'))
         context.auth_email.set(request.headers.get('x-auth-request-email'))
         context.auth_groups.set(request.headers.get('x-auth-request-groups'))
@@ -40,14 +41,19 @@ class HeaderPropagationMiddleware(BaseHTTPMiddleware):
         if auth_header and (token := split_bearer_token(auth_header)):
             try:
                 claims = jwt.decode(token, options={"verify_signature": False})
-                context.auth_name.set(
+                logger.info(f"JWT claims: {claims}")
+                name = (
                     claims.get('name') or
                     claims.get('given_name') or
                     claims.get('nickname') or
                     claims.get('preferred_username')
                 )
+                logger.info(f"Extracted name: {name}")
+                context.auth_name.set(name)
             except Exception as e:
                 logger.warning(f"failed to decode JWT: {e}")
+        else:
+            logger.info(f"No valid Authorization header. auth_header present: {auth_header is not None}")
 
         response = await call_next(request)
         return response
