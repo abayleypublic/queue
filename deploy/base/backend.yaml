@@ -36,9 +36,9 @@ spec:
           ports:
             - containerPort: 80
           env:
-            - name: ADDRESS
+            - name: BACKEND_ADDRESS
               value: "0.0.0.0:80"
-            - name: REDIS_URL
+            - name: BACKEND_REDIS_URL
               value: "redis://valkey:6379"
             - name: RUST_LOG
               value: "info"
