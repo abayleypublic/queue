@@ -10,7 +10,8 @@ router = APIRouter(prefix="/user")
 
 class UserResponse(BaseModel):
     """User information extracted from authentication headers."""
-    username: Optional[str] = None
+    name: Optional[str] = None
+    username: Optional[str] = None  # Contains preferred_username or email from Auth0
     email: Optional[str] = None
     groups: Optional[str] = None
 
@@ -23,6 +24,7 @@ async def get_current_user() -> UserResponse:
     Returns user details that were propagated from the authentication gateway.
     """
     return UserResponse(
+        name=context.get_auth_name(),
         username=context.get_auth_user(),
         email=context.get_auth_email(),
         groups=context.get_auth_groups()
