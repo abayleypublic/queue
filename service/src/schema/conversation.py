@@ -18,6 +18,7 @@ class Message(BaseModel):
     text: str
     queue: str = "default"
 
+    auth_name: Optional[str] = None
     auth_user: Optional[str] = None
     auth_email: Optional[str] = None
     auth_groups: Optional[str] = None

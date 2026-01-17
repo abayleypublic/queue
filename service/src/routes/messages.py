@@ -25,6 +25,12 @@ class MessageResponse(BaseModel):
 
 @router.get("/{id}", response_model=List[MessageResponse])
 async def get_messages(id: str) -> List[MessageResponse]:
+    if id != context.get_auth_email():
+        raise HTTPException(
+            status_code=HTTPStatus.FORBIDDEN,
+            detail="cannot access messages for other users"
+        )
+
     client = await cfg.temporal_client
     running = False
     try:
@@ -73,10 +79,17 @@ async def get_messages(id: str) -> List[MessageResponse]:
 
 @router.post("/{id}", response_model=ConversationResultSchema)
 async def create_message(id: str, message: Message) -> ConversationResultSchema:
+    if id != context.get_auth_email():
+        raise HTTPException(
+            status_code=HTTPStatus.FORBIDDEN,
+            detail="cannot create messages for other users"
+        )
+    
+    message.auth_name = context.get_auth_name()
     message.auth_user = context.get_auth_user()
     message.auth_email = context.get_auth_email()
     message.auth_groups = context.get_auth_groups()
-    
+
     if message.queue not in ALLOWED_QUEUES:
         raise HTTPException(
             status_code=HTTPStatus.BAD_REQUEST,

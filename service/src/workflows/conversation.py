@@ -17,13 +17,13 @@ with workflow.unsafe.imports_passed_through():
 
     from src.schema import Message, ConversationResultSchema
     from src.config import cfg
-    from src import context
 
 class AuthContext(BaseModel):
     """Context object passed to Runner with auth headers."""
     auth_user: Optional[str] = None
     auth_email: Optional[str] = None
     auth_groups: Optional[str] = None
+    auth_name: Optional[str] = None
 
 agent = Agent(
     name="Conversation Agent",
@@ -41,7 +41,7 @@ agent = Agent(
     should be used as the entity ID.
 
     If no name is specified when adding an entity to a queue, the user name
-    should be used as the entity name.
+    should be used as the entity name. If the name is empty, the user ID should be used.
     """,
 
     # The Temporal integration with OpenAI Agents does not currently support dynamic calls to MCP servers,
@@ -66,6 +66,7 @@ class Conversation:
         self._processing: Lock = Lock()
         self._user: str = ""
         # Store auth headers to pass to activities
+        self._auth_name: Optional[str] = None
         self._auth_user: Optional[str] = None
         self._auth_email: Optional[str] = None
         self._auth_groups: Optional[str] = None
@@ -84,6 +85,7 @@ class Conversation:
             if self._message is not None:
                 raise RuntimeError("message already set, cannot update.")
 
+            self._auth_name = message.auth_name
             self._auth_user = message.auth_user
             self._auth_email = message.auth_email
             self._auth_groups = message.auth_groups
@@ -104,6 +106,7 @@ class Conversation:
             workflow.logger.info(f"processing message: {self._message.text}")
 
             auth_context = AuthContext(
+                auth_name=self._auth_name,
                 auth_user=self._auth_user,
                 auth_email=self._auth_email,
                 auth_groups=self._auth_groups,
@@ -115,7 +118,8 @@ class Conversation:
                     {
                         "role": "user",
                         "content": f"""
-                            User name: {auth_context.auth_user}
+                            User Name: {auth_context.auth_name}
+                            User ID: {auth_context.auth_user}
                             User email: {auth_context.auth_email}
                             User groups: {auth_context.auth_groups}
                             Queue: {self._message.queue}

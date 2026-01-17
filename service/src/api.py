@@ -1,12 +1,28 @@
+from typing import Optional
+
 from fastapi import FastAPI, Request
 from starlette.middleware.base import BaseHTTPMiddleware
 from uvicorn import Config, Server
 from loguru import logger
+import jwt
 
 from .routes import messages, user
 from .config import cfg
 from . import context
 
+
+def split_bearer_token(auth_header: str) -> Optional[str]:
+    """
+    Extract bearer token from Authorization header.
+    """
+    header_split = auth_header.split(" ")
+    if len(header_split) != 2:
+        return None
+    
+    if header_split[0].lower() != "bearer":
+        return None
+
+    return header_split[1]
 
 class HeaderPropagationMiddleware(BaseHTTPMiddleware):
     """
@@ -16,10 +32,22 @@ class HeaderPropagationMiddleware(BaseHTTPMiddleware):
     without explicit parameter passing.
     """
     async def dispatch(self, request: Request, call_next):
-        # Extract authentication headers from gateway
         context.auth_user.set(request.headers.get('x-auth-request-user'))
         context.auth_email.set(request.headers.get('x-auth-request-email'))
         context.auth_groups.set(request.headers.get('x-auth-request-groups'))
+        
+        auth_header = request.headers.get('authorization')
+        if auth_header and (token := split_bearer_token(auth_header)):
+            try:
+                claims = jwt.decode(token, options={"verify_signature": False})
+                context.auth_name.set(
+                    claims.get('name') or
+                    claims.get('given_name') or
+                    claims.get('nickname') or
+                    claims.get('preferred_username')
+                )
+            except Exception as e:
+                logger.warning(f"failed to decode JWT: {e}")
 
         response = await call_next(request)
         return response
