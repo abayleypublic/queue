@@ -21,7 +21,7 @@ const Layout = ({ children }: LayoutProps) => {
                     <div className="text-xl font-bold">Queue</div>
                     {user?.username && (
                         <div className="flex items-center gap-4">
-                            <span className="text-sm">{user.username}</span>
+                            <span className="text-sm">{user.name}</span>
                             <button
                                 onClick={handleSignOut}
                                 className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-colors cursor-pointer"
