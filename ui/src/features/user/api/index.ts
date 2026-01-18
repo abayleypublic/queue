@@ -8,3 +8,7 @@ export const GetUser = async (): Promise<User> => {
     }
     return await response.json()
 }
+
+export const SignOut = async (): Promise<void> => {
+    window.location.href = `${Config.apiURL}/oauth2/sign_out`
+}
