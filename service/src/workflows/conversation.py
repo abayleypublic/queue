@@ -116,13 +116,18 @@ class Conversation:
                 agent,
                 self._history + [
                     {
-                        "role": "user",
+                        "role": "developer",
                         "content": f"""
                             User Name: {auth_context.auth_name}
                             User ID: {auth_context.auth_user}
                             User email: {auth_context.auth_email}
                             User groups: {auth_context.auth_groups}
                             Queue: {self._message.queue}
+                        """
+                    },
+                    {
+                        "role": "user",
+                        "content": f"""
                             {self._message.text}
                         """
                     }
@@ -133,6 +138,5 @@ class Conversation:
                 )
             )
 
-            # Apparently all the previous responses are included in this list? Interesting one.
-            self._history = self._response.to_input_list()
+            self._history = [msg for msg in self._response.to_input_list() if msg.get("role") != "developer"]
             self._message = None
