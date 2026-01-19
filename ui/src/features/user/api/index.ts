@@ -10,5 +10,7 @@ export const GetUser = async (): Promise<User> => {
 }
 
 export const SignOut = async (): Promise<void> => {
-    window.location.href = `${Config.apiURL}/oauth2/sign_out`
+    const returnTo = `${window.location.origin}/`
+    const logoutUrl = `${Config.apiURL}/oauth2/sign_out?rd=${encodeURIComponent(returnTo)}`
+    window.location.href = logoutUrl
 }
