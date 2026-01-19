@@ -56,6 +56,7 @@ agent = Agent(
 
 class ConversationArgs(BaseModel):
     user_id: str
+    history: Optional[List[TResponseInputItem]] = []
 
 @workflow.defn
 class Conversation:
@@ -64,6 +65,7 @@ class Conversation:
         self._response: RunResult | None = None
         self._history: List[TResponseInputItem] = []
         self._processing: Lock = Lock()
+        self._message_limit: int = 50
         self._user: str = ""
         # Store auth headers to pass to activities
         self._auth_name: Optional[str] = None
@@ -100,6 +102,7 @@ class Conversation:
     async def run(self, args: ConversationArgs) -> str:
         workflow.logger.info(f"starting conversation for user {args.user_id}")
         self._user = args.user_id
+        self._history = args.history or []
 
         while True:
             await workflow.wait_condition(lambda: self._message is not None)
@@ -116,13 +119,18 @@ class Conversation:
                 agent,
                 self._history + [
                     {
-                        "role": "user",
+                        "role": "developer",
                         "content": f"""
                             User Name: {auth_context.auth_name}
                             User ID: {auth_context.auth_user}
                             User email: {auth_context.auth_email}
                             User groups: {auth_context.auth_groups}
                             Queue: {self._message.queue}
+                        """
+                    },
+                    {
+                        "role": "user",
+                        "content": f"""
                             {self._message.text}
                         """
                     }
@@ -133,6 +141,12 @@ class Conversation:
                 )
             )
 
-            # Apparently all the previous responses are included in this list? Interesting one.
-            self._history = self._response.to_input_list()
+            self._history = [msg for msg in self._response.to_input_list() if msg.get("role") != "developer"][-self._message_limit:]
             self._message = None
+
+            if workflow.info().is_continue_as_new_suggested():
+                workflow.logger.info("continuing as new to avoid history growth")
+                workflow.continue_as_new(ConversationArgs(
+                    user_id=self._user,
+                    history=self._history,
+                ))
