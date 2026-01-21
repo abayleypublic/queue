@@ -25,19 +25,3 @@ tasks:
         --grpc-gateway_opt paths=source_relative \
         --openapiv2_out ./gen \
         ../proto/queue_service.proto
-
-  # ==========
-  # Terraform
-  # ==========
-
-  plan-infra:
-    dir: infra
-    desc: Plan infra
-    cmds:
-      - terraform plan -var-file="../.tfvars"
-
-  apply-infra:
-    dir: infra
-    desc: Apply infra
-    cmds:
-      - terraform apply -var-file="../.tfvars"
