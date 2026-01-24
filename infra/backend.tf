@@ -1,5 +1,6 @@
 terraform {
-    backend "gcs" {
-        bucket = "007747efb8fd85f6-queue-terraform-state"
-    }
+  backend "gcs" {
+    bucket = "b255f83f593efd7a-infra-terraform-state"
+    prefix = "queue"
+  }
 }
