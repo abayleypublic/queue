@@ -12,12 +12,9 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from temporalio.client import Client, TLSConfig
 from temporalio.common import RetryPolicy
 from temporalio.activity import _Definition
-from temporalio.contrib.pydantic import pydantic_data_converter
 from temporalio.contrib.openai_agents import OpenAIAgentsPlugin, ModelActivityParameters
 from temporalio.contrib.opentelemetry import TracingInterceptor
 from mcp import Tool as MCPTool
-
-from src import context
 
 # as per https://json-schema.org/understanding-json-schema/reference/type
 json_schema_types_to_python: dict[str, type] = {
@@ -34,6 +31,11 @@ class APIConfig(BaseSettings):
 
     host: str = "0.0.0.0"
     port: int = 8003
+
+class BackendConfig(BaseSettings):
+    model_config = SettingsConfigDict(env_prefix="backend_")
+
+    url: str = "localhost:8001"
 
 class Property(BaseModel):
     name: str
@@ -227,6 +229,7 @@ class TemporalWorkerConfig(BaseSettings):
 
 class Config(BaseModel):
     api: APIConfig = APIConfig()
+    backend: BackendConfig = BackendConfig()
     mcp: MCPConfig = MCPConfig()
     openai: OpenAIConfig = OpenAIConfig()
     temporal: TemporalConfig = TemporalConfig()
@@ -237,7 +240,6 @@ class Config(BaseModel):
         return Client.connect(
             f"{self.temporal.host}:{self.temporal.port}",
             namespace=self.temporal.namespace,
-            data_converter=pydantic_data_converter,
             tls=self.temporal.tls_config,
             plugins=[OpenAIAgentsPlugin(
                 model_params=ModelActivityParameters(

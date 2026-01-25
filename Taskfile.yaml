@@ -11,6 +11,16 @@ tasks:
         --python_out=. --pyi_out=. --grpc_python_out=. \
         ../proto/queue_service.proto
 
+  gen-service-grpc:
+    dir: "service"
+    cmds:
+      - mkdir -p src/gen
+      - |
+        .venv/bin/python -m grpc_tools.protoc \
+        -I src/gen=../proto -I ../proto \
+        --python_out=. --pyi_out=. --grpc_python_out=. \
+        ../proto/queue_service.proto
+
   gen-gateway-grpc:
     dir: "gateway"
     cmds:

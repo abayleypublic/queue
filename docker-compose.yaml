@@ -40,6 +40,7 @@ services:
     ports:
       - "8003:8003"
     environment:
+      - BACKEND_URL=backend:8001
       - MCP_ADDRESS=http://mcp:8002/mcp
       - TEMPORAL_HOST=host.docker.internal
       - TEMPORAL_PORT=7233

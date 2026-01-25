@@ -65,15 +65,69 @@ impl Queue for QueueService {
     ) -> Result<Response<SetQueueResponse>, Status> {
         debug!("received set_queue request: {:?}", request);
 
-        let user = user_from_request(&request);
-        if user.is_none() || user.unwrap().email.is_empty() {
-            return Err(Status::unauthenticated("user not authenticated"));
+        let user = user_from_request(&request)
+            .ok_or_else(|| Status::unauthenticated("user not authenticated"))?;
+
+        if user.email.is_empty() {
+            return Err(Status::unauthenticated("user email is required"));
         }
 
         let inner = request.into_inner();
-        let key = queue_key(inner.id);
 
+        // Validate that user only has at most one entity in the queue
+        let user_entities: Vec<&Entity> = inner
+            .entities
+            .iter()
+            .filter(|e| e.id == user.email)
+            .collect();
+
+        if user_entities.len() > 1 {
+            return Err(Status::invalid_argument(
+                "users can only have one entity in a queue",
+            ));
+        }
+
+        // Get current queue state to validate changes
+        let key = queue_key(inner.id.clone());
         let mut conn = self.redis.clone();
+
+        let existing: Vec<String> = conn
+            .lrange(&key, 0, -1)
+            .instrument(info_span!("redis", cmd = "LRANGE", key = %key))
+            .await
+            .map_err(|e| Status::internal(format!("Redis error: {e}")))?;
+
+        let existing_entities: Vec<Entity> = existing
+            .into_iter()
+            .filter_map(|item| serde_json::from_str(&item).ok())
+            .collect();
+
+        for entity in &inner.entities {
+            if entity.id != user.email {
+                let entity_existed = existing_entities
+                    .iter()
+                    .any(|e| e.id == entity.id && e.name == entity.name);
+
+                if !entity_existed {
+                    return Err(Status::permission_denied(format!(
+                        "users can only add or modify entities with their email as the ID ({})",
+                        user.email
+                    )));
+                }
+            }
+        }
+
+        for existing_entity in &existing_entities {
+            if existing_entity.id != user.email {
+                let still_exists = inner.entities.iter().any(|e| e.id == existing_entity.id);
+
+                if !still_exists {
+                    return Err(Status::permission_denied(
+                        "users cannot remove entities that don't belong to them",
+                    ));
+                }
+            }
+        }
 
         let _: i64 = conn
             .del(&key)
