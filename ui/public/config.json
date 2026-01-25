@@ -1,4 +1,5 @@
 {
     "api_url": "http://localhost:5173",
-    "queue": "default"
+    "queue": "default",
+    "account_url": "https://account.stg.austinbayley.co.uk"
 }

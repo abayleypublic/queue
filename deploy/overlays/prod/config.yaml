@@ -6,5 +6,6 @@ data:
   config.json: |
     {
       "api_url": "https://queue.austinbayley.co.uk",
-      "queue": "default"
+      "queue": "default",
+      "account_url": "https://account.austinbayley.co.uk"
     }
