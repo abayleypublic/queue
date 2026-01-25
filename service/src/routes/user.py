@@ -49,7 +49,6 @@ class QueueData(BaseModel):
 
 class UserDataResponse(BaseModel):
     """GDPR data export response."""
-    email: str
     queues: List[QueueData]
     workflow_status: Optional[str] = None
     conversation_history: Optional[List[Dict]] = None
@@ -139,7 +138,6 @@ async def download_user_data() -> UserDataResponse:
     
     logger.info(f"GDPR export completed for user: {email}")
     return UserDataResponse(
-        email=email,
         queues=queues_data,
         workflow_status=workflow_status,
         conversation_history=conversation_history

@@ -1,6 +1,7 @@
 from asyncio import Lock
 from typing import List, Optional
 from datetime import timedelta
+import hashlib
 
 from temporalio import workflow
 
@@ -74,8 +75,10 @@ class Conversation:
         self._auth_groups: Optional[str] = None
 
     @staticmethod
-    def id(user:str) -> str:
-        return f"conversation_{user}"
+    def id(user: str) -> str:
+        """Create a workflow ID using a hashed version of the user email for privacy."""
+        hashed = hashlib.sha256(user.encode()).hexdigest()[:16]
+        return f"conversation_{hashed}"
 
     @workflow.query
     async def get_history(self) -> List[TResponseInputItem]:
