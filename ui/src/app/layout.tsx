@@ -32,9 +32,13 @@ const Layout = ({ children }: LayoutProps) => {
                         <ThemeToggle />
                     </div>
                     <div />
-                    <div className="inline-flex items-center">
+                    <div className="inline-flex gap-4 items-center mr-2">
+                        <a href="https://account.austinbayley.co.uk/privacy-policy" target="_blank" rel="noopener noreferrer">
+                            Privacy Policy
+                        </a>
+                        <span className="text-gray-300 dark:text-gray-600">|</span>
                         <a href="https://github.com/abayleypublic/queue" target="_blank" rel="noopener noreferrer">
-                            https://github.com/abayleypublic/queue
+                            Github
                         </a>
                     </div>
                 </div>
